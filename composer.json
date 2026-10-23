@@ -13,7 +13,7 @@
     }
   ],
   "scripts": {
-    "start": "php -S localhost:8080 -t public"
+    "start": "php -S localhost:8000 -t public"
   },
   "require": {
     "vlucas/phpdotenv": "^5.7",
