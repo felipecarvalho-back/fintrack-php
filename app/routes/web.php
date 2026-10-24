@@ -1,8 +1,9 @@
 <?php
 
-use App\Controller\HomeController;
+use App\Controller\AuthController;
 use Slim\App;
 
 return function (App $app) {
-    $app->get('/', [HomeController::class, 'home']);
+    $app->get('/', [AuthController::class, 'login']);
+    $app->get('/cadastro', [AuthController::class, 'cadastro']);
 };
