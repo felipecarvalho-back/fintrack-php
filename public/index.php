@@ -12,7 +12,7 @@ $dotenv = Dotenv::createImmutable(dirname(__DIR__));
 $dotenv->safeLoad();
 
 $containerBuilder = new ContainerBuilder();
-// $containerBuilder->addDefinitions(__DIR__ . '/../app/config/database.php');
+$containerBuilder->addDefinitions(__DIR__ . '/../app/config/database.php');
 $containerBuilder->addDefinitions(__DIR__ . '/../app/config/template.php');
 $container = $containerBuilder->build();
 

@@ -18,18 +18,18 @@ class HomeController
 
     public function home(Request $request, Response $response): Response
     {
-        // echo $this->conta->select('codigo_conta', 'nome');
+        // var_dump($this->conta->select());
         // echo $this->conta->create([
         //     'nome' => 'Felipe',
         //     'numeroconta' => '123456',
         //     'senha' => 'kira'
         // ]);
         // echo $this->conta->update([
-        //     'nome' => 'Felipe',
-        //     'numeroconta' => '123456',
-        //     'senha' => 'kira'
+        //     'nome' => 'Test12',
+        //     'numeroconta' => '1212',
+        //     'senha' => 'felipe'
         // ], 2);
-        // echo $this->conta->delete(12);
+        echo $this->conta->delete(1);
 
         return $this->renderer->render($response, 'home.php', [
             'titulo' => 'Olha',
