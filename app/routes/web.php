@@ -6,4 +6,5 @@ use Slim\App;
 return function (App $app) {
     $app->get('/', [AuthController::class, 'login']);
     $app->get('/cadastro', [AuthController::class, 'cadastro']);
+    $app->post('/cadastro', [AuthController::class, 'create']);
 };
