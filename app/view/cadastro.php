@@ -100,15 +100,26 @@
                     <!-- Formulário de Cadastro -->
                     <form action="/cadastro" method="POST">
 
+                        <!-- Alerta de Erro -->
+                        <?php if (!empty($_SESSION['erro'])): ?>
+                            <div class="alert alert-danger py-2 small d-flex align-items-center mb-3" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+                                <div><?php echo htmlspecialchars($_SESSION['erro']); ?></div>
+                            </div>
+                            <?php unset($_SESSION['erro']); ?>
+                        <?php endif; ?>
+
                         <!-- Nome Completo -->
                         <div class="mb-3">
-                            <label for="nome" class="form-label small fw-semibold text-secondary">Nome Completo</label>
+                            <label for="nome_completo" class="form-label small fw-semibold text-secondary">Nome Completo</label>
                             <div class="input-group input-group-integrated">
                                 <span class="input-group-text pe-2">
                                     <i class="bi bi-person"></i>
                                 </span>
-                                <input type="text" class="form-control ps-1" id="nome" name="nome"
-                                    placeholder="Ex: João da Silva" required autocomplete="name">
+                                <input type="text" class="form-control ps-1" id="nome_completo" name="nome_completo"
+                                    placeholder="Ex: João da Silva"
+                                    value="<?php echo htmlspecialchars($_SESSION['dados_antigos']['nome_completo'] ?? ''); ?>"
+                                    required autocomplete="nome_completo">
                             </div>
                         </div>
 
@@ -120,9 +131,12 @@
                                     <i class="bi bi-envelope"></i>
                                 </span>
                                 <input type="email" class="form-control ps-1" id="email" name="email"
-                                    placeholder="seu@email.com" required autocomplete="username">
+                                    placeholder="seu@email.com"
+                                    value="<?php echo htmlspecialchars($_SESSION['dados_antigos']['email'] ?? ''); ?>"
+                                    required autocomplete="username">
                             </div>
                         </div>
+                        <?php unset($_SESSION['dados_antigos']); ?>
 
                         <!-- Senha -->
                         <div class="mb-3">

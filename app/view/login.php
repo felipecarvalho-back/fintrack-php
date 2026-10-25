@@ -97,6 +97,16 @@
 
                     <!-- Formulário de Login -->
                     <form action="/login" method="POST">
+
+                        <!-- Alerta de Sucesso -->
+                        <?php if (!empty($_SESSION['sucesso'])): ?>
+                            <div class="alert alert-success py-2 small d-flex align-items-center mb-3" role="alert">
+                                <i class="bi bi-check-circle-fill me-2 fs-6"></i>
+                                <div><?php echo htmlspecialchars($_SESSION['sucesso']); ?></div>
+                            </div>
+                            <?php unset($_SESSION['sucesso']); ?>
+                        <?php endif; ?>
+
                         <!-- Campo de E-mail / Usuário -->
                         <div class="mb-3">
                             <label for="email" class="form-label small fw-semibold text-secondary">E-mail ou Usuário</label>
