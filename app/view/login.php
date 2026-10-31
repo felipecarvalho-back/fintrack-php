@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $titulo ?? 'Login - Sistema Financeiro'; ?></title>
-    
+
     <!-- Bootstrap 6 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-B/GM4XqrwHnWXNOWMbloTmrYXZg10cakYGmpfsR/bbzQ6JAJI4ihuyADKLnBgrCe" crossorigin="anonymous">
-    
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
@@ -85,7 +85,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
                 <div class="card login-card p-4 p-sm-5 mx-auto">
-                    
+
                     <!-- Cabeçalho / Identidade Visual -->
                     <div class="text-center mb-4">
                         <div class="brand-icon mb-3">
@@ -98,6 +98,17 @@
                     <!-- Formulário de Login -->
                     <form action="/login" method="POST">
 
+                        <!-- Alerta de Erro -->
+                        <?php if (!empty($_SESSION['erro'])): ?>
+                            <div class="alert alert-danger py-2 small d-flex align-items-center mb-3" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+                                <div>
+                                    <?php echo htmlspecialchars($_SESSION['erro']); ?>
+                                </div>
+                            </div>
+                            <?php unset($_SESSION['erro']); ?>
+                        <?php endif; ?>
+
                         <!-- Alerta de Sucesso -->
                         <?php if (!empty($_SESSION['sucesso'])): ?>
                             <div class="alert alert-success py-2 small d-flex align-items-center mb-3" role="alert">
@@ -109,7 +120,8 @@
 
                         <!-- Campo de E-mail / Usuário -->
                         <div class="mb-3">
-                            <label for="email" class="form-label small fw-semibold text-secondary">E-mail ou Usuário</label>
+                            <label for="email" class="form-label small fw-semibold text-secondary">E-mail ou
+                                Usuário</label>
                             <div class="input-group input-group-integrated">
                                 <span class="input-group-text pe-2">
                                     <i class="bi bi-envelope"></i>
@@ -129,10 +141,10 @@
                                 <span class="input-group-text pe-2">
                                     <i class="bi bi-lock"></i>
                                 </span>
-                                <input type="password" class="form-control ps-1" id="senha"
-                                    name="senha" placeholder="••••••••" required autocomplete="current-password">
-                                <button class="btn text-muted"
-                                    type="button" id="toggleSenha" aria-label="Mostrar ou ocultar senha">
+                                <input type="password" class="form-control ps-1" id="senha" name="senha"
+                                    placeholder="••••••••" required autocomplete="current-password">
+                                <button class="btn text-muted" type="button" id="toggleSenha"
+                                    aria-label="Mostrar ou ocultar senha">
                                     <i class="bi bi-eye" id="toggleIcon"></i>
                                 </button>
                             </div>
@@ -154,7 +166,8 @@
                         <!-- Link para Cadastro -->
                         <div class="text-center mb-3">
                             <span class="small text-muted">Não possui uma conta? </span>
-                            <a href="/cadastro" class="small fw-semibold text-primary text-decoration-none">Cadastre-se</a>
+                            <a href="/cadastro"
+                                class="small fw-semibold text-primary text-decoration-none">Cadastre-se</a>
                         </div>
 
                         <!-- Indicador de Segurança -->

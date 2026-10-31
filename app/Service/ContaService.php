@@ -12,13 +12,14 @@ class ContaService
 {
     public function __construct(
         private ContaRepository $contaRepository
-    ) {}
+    ) {
+    }
 
     public function cadastrar(array $dados): int
     {
-        $nomeCompleto   = trim((string) ($dados['nome_completo'] ?? ''));
-        $email          = trim((string) ($dados['email'] ?? ''));
-        $senha          = (string) ($dados['senha'] ?? '');
+        $nomeCompleto = trim((string) ($dados['nome_completo'] ?? ''));
+        $email = trim((string) ($dados['email'] ?? ''));
+        $senha = (string) ($dados['senha'] ?? '');
         $confirmarSenha = (string) ($dados['confirmar_senha'] ?? '');
 
         if (empty($nomeCompleto)) {
@@ -49,5 +50,23 @@ class ContaService
         );
 
         return $this->contaRepository->insert($conta);
+    }
+
+    public function login(array $dados): bool
+    {
+        $email = trim((string) ($dados['email'] ?? ''));
+        $senha = (string) ($dados['senha'] ?? '');
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException("Informe um e-mail válido.");
+        }
+
+        $conta = $this->contaRepository->findByEmail($email);
+
+        if (!password_verify($senha, $conta->getSenha())) {
+            throw new InvalidArgumentException("Verifique o e-mail ou a senha");
+        }
+
+        return true;
     }
 }

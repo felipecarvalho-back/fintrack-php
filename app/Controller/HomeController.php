@@ -13,24 +13,10 @@ class HomeController
 {
     public function __construct(
         private PhpRenderer $renderer,
-        private Conta $conta
     ) {}
 
     public function home(Request $request, Response $response): Response
     {
-        // var_dump($this->conta->select());
-        // echo $this->conta->create([
-        //     'nome' => 'Felipe',
-        //     'numeroconta' => '123456',
-        //     'senha' => 'kira'
-        // ]);
-        // echo $this->conta->update([
-        //     'nome' => 'Test12',
-        //     'numeroconta' => '1212',
-        //     'senha' => 'felipe'
-        // ], 2);
-        echo $this->conta->delete(1);
-
         return $this->renderer->render($response, 'home.php', [
             'titulo' => 'Olha',
         ]);

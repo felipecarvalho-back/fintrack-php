@@ -15,13 +15,34 @@ class AuthController
     public function __construct(
         private PhpRenderer $renderer,
         private ContaService $contaService
-    ) {}
+    ) {
+    }
 
     public function login(Request $request, Response $response): Response
     {
         return $this->renderer->render($response, 'login.php', [
             'titulo' => 'Login'
         ]);
+    }
+
+    public function validaLogin(Request $request, Response $response)
+    {
+        $data = (array) ($request->getParsedBody() ?? []);
+
+        try {
+            $this->contaService->login($data);
+
+            return $response
+                ->withHeader('Location', '/home')
+                ->withStatus(302);
+
+        } catch (InvalidArgumentException $e) {
+            $_SESSION['erro'] = $e->getMessage();
+
+            return $response
+                ->withHeader('Location', '/')
+                ->withStatus(302);
+        }
     }
 
     public function cadastro(Request $request, Response $response): Response
@@ -47,7 +68,7 @@ class AuthController
             $_SESSION['erro'] = $e->getMessage();
             $_SESSION['dados_antigos'] = [
                 'nome_completo' => $data['nome_completo'] ?? '',
-                'email'         => $data['email'] ?? '',
+                'email' => $data['email'] ?? '',
             ];
 
             return $response
