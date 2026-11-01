@@ -5,6 +5,14 @@ declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
 }
 
@@ -25,11 +33,9 @@ $app = AppFactory::create();
 
 $app->addRoutingMiddleware();
 
-$app->addErrorMiddleware(
-    displayErrorDetails: true,
-    logErrors: false,
-    logErrorDetails: false
-);
+$isDev = ($_ENV['APP_ENV'] ?? 'production') === 'development';
+$app->addErrorMiddleware($isDev, true, true);
+
 
 (require __DIR__ . '/../app/routes/web.php')($app);
 

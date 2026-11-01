@@ -5,7 +5,7 @@ use Slim\Views\PhpRenderer;
 
 return [
     PhpRenderer::class => function (ContainerInterface $container) {
-        $templatePath = dirname(__DIR__).'/view/';
+        $templatePath = dirname(__DIR__) . '/views/';
 
         return new PhpRenderer($templatePath);
     },
