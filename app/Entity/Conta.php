@@ -11,7 +11,8 @@ class Conta
         private string $nomeCompleto,
         private string $email,
         private string $senha
-    ) {}
+    ) {
+    }
 
     public function getId(): ?int
     {
@@ -31,5 +32,14 @@ class Conta
     public function getSenha(): string
     {
         return $this->senha;
+    }
+
+    public function toSessionArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'nomeCompleto' => $this->nomeCompleto,
+            'email' => $this->email,
+        ];
     }
 }

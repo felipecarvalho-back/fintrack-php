@@ -52,7 +52,7 @@ class ContaService
         return $this->contaRepository->insert($conta);
     }
 
-    public function login(array $dados): bool
+    public function login(array $dados): Conta
     {
         $email = trim((string) ($dados['email'] ?? ''));
         $senha = (string) ($dados['senha'] ?? '');
@@ -62,11 +62,11 @@ class ContaService
         }
 
         $conta = $this->contaRepository->findByEmail($email);
-
-        if (!password_verify($senha, $conta->getSenha())) {
+        
+        if (!$conta || !password_verify($senha, $conta->getSenha())) {
             throw new InvalidArgumentException("Verifique o e-mail ou a senha");
         }
 
-        return true;
+        return $conta;
     }
 }

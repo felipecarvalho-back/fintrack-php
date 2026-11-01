@@ -25,12 +25,40 @@ class AuthController
         ]);
     }
 
-    public function validaLogin(Request $request, Response $response)
+    public function logout(Request $request, Response $response): Response
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION = [];
+
+            if (ini_get('session.use_cookies')) {
+                $params = session_get_cookie_params();
+                setcookie(
+                    session_name(),
+                    '',
+                    time() - 42000,
+                    $params['path'],
+                    $params['domain'],
+                    $params['secure'],
+                    $params['httponly']
+                );
+            }
+
+            session_destroy();
+        }
+
+        return $response
+            ->withHeader('Location', '/')
+            ->withStatus(302);
+    }
+
+    public function validaLogin(Request $request, Response $response): Response
     {
         $data = (array) ($request->getParsedBody() ?? []);
 
         try {
-            $this->contaService->login($data);
+            $conta = $this->contaService->login($data);
+            session_regenerate_id(true);
+            $_SESSION['usuario'] = $conta->toSessionArray();
 
             return $response
                 ->withHeader('Location', '/home')
