@@ -13,73 +13,8 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <style>
-        body {
-            background: linear-gradient(135deg, #eef2f7 0%, #e5ebf2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-
-        .register-card {
-            width: 100%;
-            max-width: 480px;
-            border-radius: 1rem;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            background-color: #ffffff;
-        }
-
-        .brand-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgba(13, 110, 253, 0.1);
-            color: #0d6efd;
-            font-size: 1.75rem;
-        }
-
-        .input-group-integrated {
-            border: 1px solid #d0d7de;
-            border-radius: 0.5rem;
-            background-color: #ffffff;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-            overflow: hidden;
-        }
-
-        .input-group-integrated .form-control,
-        .input-group-integrated .input-group-text,
-        .input-group-integrated .btn {
-            border: none !important;
-            box-shadow: none !important;
-            outline: none !important;
-            background-color: transparent !important;
-        }
-
-        /* Destaque suave e uniforme no contêiner */
-        .input-group-integrated:focus-within {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
-        }
-
-        .input-group-text {
-            color: #6c757d;
-        }
-
-        .btn-register {
-            padding-top: 0.65rem;
-            padding-bottom: 0.65rem;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-        }
-    </style>
+    <!-- Estilos Customizados -->
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
@@ -102,7 +37,7 @@
 
                         <!-- Alerta de Erro -->
                         <?php if (!empty($_SESSION['erro'])): ?>
-                            <div class="alert alert-danger py-2 small d-flex align-items-center mb-3" role="alert">
+                            <div class="alert alert-danger theme-danger py-2 small d-flex align-items-center mb-3" role="alert">
                                 <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
                                 <div><?php echo htmlspecialchars($_SESSION['erro']); ?></div>
                             </div>
