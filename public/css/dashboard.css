@@ -1,0 +1,191 @@
+/* ==========================================================================
+   FinTrack - Estilos do Dashboard / Painel Principal
+   ========================================================================== */
+
+:root {
+    --ft-bg: #f8fafc;
+    --ft-card-bg: #ffffff;
+    --ft-border-color: #e2e8f0;
+    --ft-text-primary: #1e293b;
+    --ft-text-secondary: #64748b;
+    --ft-primary: #0d6efd;
+    --ft-success: #10b981;
+    --ft-danger: #ef4444;
+    --ft-warning: #f59e0b;
+}
+
+body {
+    background-color: var(--ft-bg);
+    color: var(--ft-text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar-custom {
+    background-color: var(--ft-card-bg);
+    border-bottom: 1px solid var(--ft-border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.brand-icon-sm {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(13, 110, 253, 0.12);
+    color: var(--ft-primary);
+    font-size: 1.25rem;
+}
+
+.avatar-sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #e0e7ff;
+    color: #4338ca;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cards de Resumo / Estatísticas */
+.stat-card {
+    background-color: var(--ft-card-bg);
+    border: 1px solid var(--ft-border-color);
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    padding: 1.25rem 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+.stat-icon-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: var(--ft-primary);
+}
+
+.stat-icon-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--ft-success);
+}
+
+.stat-icon-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--ft-danger);
+}
+
+.stat-icon-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--ft-warning);
+}
+
+/* Painéis e Tabelas */
+.card-dashboard {
+    background-color: var(--ft-card-bg);
+    border: 1px solid var(--ft-border-color);
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+}
+
+.card-dashboard-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--ft-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.table-custom th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ft-text-secondary);
+    font-weight: 600;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--ft-border-color);
+}
+
+.table-custom td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.table-custom tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+/* Cartão Virtual Visual */
+.credit-card-preview {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    border-radius: 1rem;
+    color: #ffffff;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(49, 46, 129, 0.25);
+}
+
+.credit-card-preview::after {
+    content: "";
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    top: -60px;
+    right: -60px;
+}
+
+.credit-card-chip {
+    width: 36px;
+    height: 26px;
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* Botões de Ação Rápida */
+.btn-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+}
