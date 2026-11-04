@@ -3,6 +3,7 @@ $usuario = $_SESSION['usuario'] ?? null;
 $nomeCompleto = $usuario['nomeCompleto'] ?? 'Usuário FinTrack';
 $primeiroNome = explode(' ', trim($nomeCompleto))[0];
 $iniciais = strtoupper(substr($primeiroNome, 0, 1) . (isset(explode(' ', trim($nomeCompleto))[1]) ? substr(explode(' ', trim($nomeCompleto))[1], 0, 1) : ''));
+$emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
 
 $mesAtual = (int) ($mes ?? date('n'));
 $anoAtual = (int) ($ano ?? date('Y'));
@@ -111,6 +112,7 @@ if ($proximoMes > 12) {
                 </ul>
 
                 <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                    <!-- Perfil Dropdown -->
                     <div class="dropdown">
                         <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -119,12 +121,25 @@ if ($proximoMes > 12) {
                                 <span class="d-block fw-semibold small text-truncate" style="max-width: 130px;">
                                     <?php echo htmlspecialchars($primeiroNome); ?>
                                 </span>
+                                <span class="d-block text-secondary small" style="font-size: 0.75rem;">
+                                    Minha Conta
+                                </span>
                             </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                            <li><a class="dropdown-item" href="/variaveis"><i class="bi bi-sliders me-2"></i>Minhas Variáveis</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                            <li class="px-3 py-2 border-bottom">
+                                <p class="mb-0 fw-semibold text-dark small"><?php echo htmlspecialchars($nomeCompleto); ?></p>
+                                <p class="mb-0 text-muted small" style="font-size: 0.75rem;"><?php echo htmlspecialchars($emailUsuario); ?></p>
+                            </li>
+                            <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-person me-2 text-secondary"></i> Meu Perfil</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/variaveis"><i class="bi bi-sliders me-2 text-secondary"></i> Minhas Variáveis</a></li>
+                            <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Configurações</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                            <li>
+                                <a class="dropdown-item py-2 small text-danger" href="/logout">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Encerrar Sessão
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>

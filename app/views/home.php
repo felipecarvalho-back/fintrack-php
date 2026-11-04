@@ -113,6 +113,7 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                                 <p class="mb-0 text-muted small" style="font-size: 0.75rem;"><?php echo htmlspecialchars($emailUsuario); ?></p>
                             </li>
                             <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-person me-2 text-secondary"></i> Meu Perfil</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/variaveis"><i class="bi bi-sliders me-2 text-secondary"></i> Minhas Variáveis</a></li>
                             <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Configurações</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
