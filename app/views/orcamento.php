@@ -332,7 +332,17 @@ if ($proximoMes > 12) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form action="/variaveis/adicionar" method="POST">
+                    <input type="hidden" name="origem" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/orcamento'); ?>">
                     <div class="modal-body p-4">
+
+                        <!-- Alerta de Erro de Validação -->
+                        <?php if (!empty($_SESSION['erro_modal_variavel'])): ?>
+                            <div class="alert alert-danger py-2 px-3 small d-flex align-items-center mb-3 rounded-3" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+                                <span><?php echo htmlspecialchars($_SESSION['erro_modal_variavel']); ?></span>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Tipo do Campo</label>
                             <div class="btn-group w-100" role="group">
@@ -428,6 +438,23 @@ if ($proximoMes > 12) {
         // Calcular ao carregar a página
         document.addEventListener('DOMContentLoaded', recalcularTotais);
     </script>
+
+    <!-- Script para reabrir o modal automaticamente se houver erro -->
+    <?php if (!empty($_SESSION['erro_modal_variavel'])): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modalEl = document.getElementById('modalNovaVariavel');
+                if (modalEl) {
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }
+            });
+        </script>
+        <?php 
+            unset($_SESSION['erro_modal_variavel']);
+            unset($_SESSION['dados_modal_variavel']);
+        ?>
+    <?php endif; ?>
 </body>
 
 </html>

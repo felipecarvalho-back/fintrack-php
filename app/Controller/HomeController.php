@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use InvalidArgumentException;
+use App\Service\VariavelOrcamentoService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\PhpRenderer;
@@ -12,7 +14,9 @@ class HomeController
 {
     public function __construct(
         private PhpRenderer $renderer,
-    ) {}
+        private VariavelOrcamentoService $variavelOrcamento
+    ) {
+    }
 
     public function home(Request $request, Response $response): Response
     {
@@ -25,8 +29,8 @@ class HomeController
     {
         return $this->renderer->render($response, 'orcamento.php', [
             'titulo' => 'Orçamento Mensal - FinTrack',
-            'ano'    => (int) ($args['ano'] ?? date('Y')),
-            'mes'    => (int) ($args['mes'] ?? date('n')),
+            'ano' => (int) ($args['ano'] ?? date('Y')),
+            'mes' => (int) ($args['mes'] ?? date('n')),
         ]);
     }
 
@@ -41,13 +45,6 @@ class HomeController
     {
         return $this->renderer->render($response, 'investimentos.php', [
             'titulo' => 'Investimentos - FinTrack',
-        ]);
-    }
-
-    public function variaveis(Request $request, Response $response): Response
-    {
-        return $this->renderer->render($response, 'variaveis.php', [
-            'titulo' => 'Minhas Variáveis - FinTrack',
         ]);
     }
 }

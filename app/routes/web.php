@@ -2,6 +2,7 @@
 
 use App\Controller\AuthController;
 use App\Controller\HomeController;
+use App\Controller\VariavelController;
 use App\Middleware\ValidaLoginMiddleware;
 use Slim\App;
 
@@ -27,5 +28,7 @@ return function (App $app) {
     $app->get('/investimentos', [HomeController::class, 'investimentos'])->add(ValidaLoginMiddleware::class);
 
     // Minhas Variáveis de Orçamento
-    $app->get('/variaveis', [HomeController::class, 'variaveis'])->add(ValidaLoginMiddleware::class);
+    $app->get('/variaveis', [VariavelController::class, 'index'])->add(ValidaLoginMiddleware::class);
+    $app->post('/variaveis/adicionar', [VariavelController::class, 'adicionar'])->add(ValidaLoginMiddleware::class);
+    $app->post('/variaveis/excluir/{id:[0-9]+}', [VariavelController::class, 'excluir'])->add(ValidaLoginMiddleware::class);
 };
