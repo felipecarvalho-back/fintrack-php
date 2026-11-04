@@ -17,7 +17,37 @@ class HomeController
     public function home(Request $request, Response $response): Response
     {
         return $this->renderer->render($response, 'home.php', [
-            'titulo' => 'Olha',
+            'titulo' => 'Dashboard - FinTrack',
+        ]);
+    }
+
+    public function orcamento(Request $request, Response $response, array $args = []): Response
+    {
+        return $this->renderer->render($response, 'orcamento.php', [
+            'titulo' => 'Orçamento Mensal - FinTrack',
+            'ano'    => (int) ($args['ano'] ?? date('Y')),
+            'mes'    => (int) ($args['mes'] ?? date('n')),
+        ]);
+    }
+
+    public function caixinhas(Request $request, Response $response): Response
+    {
+        return $this->renderer->render($response, 'caixinhas.php', [
+            'titulo' => 'Caixinhas & Metas - FinTrack',
+        ]);
+    }
+
+    public function investimentos(Request $request, Response $response): Response
+    {
+        return $this->renderer->render($response, 'investimentos.php', [
+            'titulo' => 'Investimentos - FinTrack',
+        ]);
+    }
+
+    public function variaveis(Request $request, Response $response): Response
+    {
+        return $this->renderer->render($response, 'variaveis.php', [
+            'titulo' => 'Minhas Variáveis - FinTrack',
         ]);
     }
 }
