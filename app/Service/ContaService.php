@@ -6,12 +6,14 @@ namespace App\Service;
 
 use App\Entity\Conta;
 use App\Repository\ContaRepository;
+use App\Repository\VariavelOrcamentoRepository;
 use InvalidArgumentException;
 
 class ContaService
 {
     public function __construct(
-        private ContaRepository $contaRepository
+        private ContaRepository $contaRepository,
+        private ?VariavelOrcamentoRepository $variavelRepository = null
     ) {
     }
 
@@ -49,7 +51,14 @@ class ContaService
             senha: password_hash($senha, PASSWORD_DEFAULT)
         );
 
-        return $this->contaRepository->insert($conta);
+        $novoId = $this->contaRepository->insert($conta);
+
+        // Onboarding: cria as variáveis padrão para o novo usuário começar pronto
+        if ($this->variavelRepository !== null) {
+            $this->variavelRepository->inserirPadroes($novoId);
+        }
+
+        return $novoId;
     }
 
     public function login(array $dados): Conta

@@ -76,6 +76,39 @@ class VariavelOrcamentoRepository
         return $stmt->rowCount() > 0;
     }
 
+    /**
+     * Cria conjunto inicial de variáveis para um novo usuário cadastrado.
+     */
+    public function inserirPadroes(int $contaId): void
+    {
+        $padroes = [
+            ['nome' => 'Salário Líquido', 'tipo' => 'receita', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 1],
+            ['nome' => 'Vale Refeição (VR)', 'tipo' => 'receita', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 2],
+            ['nome' => 'Renda Extra / Freelance', 'tipo' => 'receita', 'is_fixo' => 0, 'valor' => 0.0, 'ordem' => 3],
+            ['nome' => 'Aluguel / Condomínio', 'tipo' => 'despesa', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 1],
+            ['nome' => 'Supermercado', 'tipo' => 'despesa', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 2],
+            ['nome' => 'Luz & Água', 'tipo' => 'despesa', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 3],
+            ['nome' => 'Internet Fibra', 'tipo' => 'despesa', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 4],
+            ['nome' => 'Cartão de Crédito', 'tipo' => 'despesa', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 5],
+        ];
+
+        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, is_fixo, valor_padrao, ordem) 
+                VALUES (:conta_id, :nome, :tipo, :is_fixo, :valor_padrao, :ordem)";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        foreach ($padroes as $item) {
+            $stmt->execute([
+                ':conta_id'     => $contaId,
+                ':nome'         => $item['nome'],
+                ':tipo'         => $item['tipo'],
+                ':is_fixo'      => $item['is_fixo'],
+                ':valor_padrao' => $item['valor'],
+                ':ordem'        => $item['ordem'],
+            ]);
+        }
+    }
+
     private function proximaOrdem(int $contaId, string $tipo): int
     {
         $sql = "SELECT COALESCE(MAX(ordem), 0) + 1 
