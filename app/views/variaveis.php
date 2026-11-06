@@ -175,7 +175,7 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                         <td class="ps-3 fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></td>
                                         <td class="text-end text-success fw-medium">R$ <?php echo number_format($item['valorPadrao'], 2, ',', '.'); ?></td>
                                         <td class="text-center">
-                                            <?php if ($item['is_fixo']): ?>
+                                            <?php if ($item['isFixo']): ?>
                                                 <span class="badge bg-primary-subtle text-primary">Fixo</span>
                                             <?php else: ?>
                                                 <span class="badge bg-secondary-subtle text-secondary">Variável</span>
@@ -224,7 +224,7 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                         <td class="ps-3 fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></td>
                                         <td class="text-end text-danger fw-medium">R$ <?php echo number_format($item['valorPadrao'], 2, ',', '.'); ?></td>
                                         <td class="text-center">
-                                            <?php if ($item['is_fixo']): ?>
+                                            <?php if ($item['isFixo']): ?>
                                                 <span class="badge bg-primary-subtle text-primary">Fixo</span>
                                             <?php else: ?>
                                                 <span class="badge bg-secondary-subtle text-secondary">Variável</span>
