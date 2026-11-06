@@ -157,8 +157,8 @@ $rentabilidadePercentual = $totalInvestido > 0 ? ($lucroTotal / $totalInvestido)
                 <p class="text-secondary small mb-0 mt-1">Acompanhe a rentabilidade e evolução do seu patrimônio investido.</p>
             </div>
             <div>
-                <button type="button" class="btn btn-primary px-4 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNovoInvestimento">
-                    <i class="bi bi-plus-lg me-1"></i> Novo Ativo
+                <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalNovoInvestimento">
+                    <i class="bi bi-plus-lg"></i> Novo Ativo
                 </button>
             </div>
         </div>
@@ -286,10 +286,18 @@ $rentabilidadePercentual = $totalInvestido > 0 ? ($lucroTotal / $totalInvestido)
     <!-- Modal Novo Investimento -->
     <div class="modal fade" id="modalNovoInvestimento" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow rounded-4">
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-bold">Cadastrar Novo Ativo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-bottom bg-light px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                            <i class="bi bi-graph-up-arrow fs-5"></i>
+                        </span>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Cadastrar Novo Ativo</h5>
+                            <span class="text-secondary small" style="font-size: 0.75rem;">Acompanhe seus rendimentos e patrimônio</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form action="/investimentos" method="POST">
                     <div class="modal-body p-4">
@@ -327,9 +335,11 @@ $rentabilidadePercentual = $totalInvestido > 0 ? ($lucroTotal / $totalInvestido)
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-top">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Salvar Ativo</button>
+                    <div class="modal-footer border-top bg-light px-4 py-3">
+                        <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Salvar Ativo
+                        </button>
                     </div>
                 </form>
             </div>
@@ -339,24 +349,32 @@ $rentabilidadePercentual = $totalInvestido > 0 ? ($lucroTotal / $totalInvestido)
     <!-- Modal Atualizar Saldo do Investimento -->
     <div class="modal fade" id="modalAtualizarSaldo" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0 shadow rounded-4">
-                <div class="modal-header border-bottom">
-                    <h6 class="modal-title fw-bold">Atualizar Cotação/Saldo</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-bottom bg-light px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                            <i class="bi bi-arrow-repeat fs-5"></i>
+                        </span>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0 fs-6">Atualizar Cotação</h6>
+                            <span class="text-secondary small" id="atualizarNomeAtivo" style="font-size: 0.75rem;">Ativo</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form action="/investimentos/atualizar-saldo" method="POST">
                     <input type="hidden" name="investimento_id" id="atualizarId">
                     <div class="modal-body p-4 text-center">
-                        <p class="text-secondary small mb-2" id="atualizarNomeAtivo">Ativo</p>
-                        <div class="input-group">
+                        <div class="input-group mb-2">
                             <span class="input-group-text bg-white border-end-0">R$</span>
                             <input type="number" step="0.01" min="0" class="form-control form-control-lg text-end fw-bold" 
-                                name="current_value" id="atualizarValorInput" placeholder="0.00" required>
+                                name="current_value" id="atualizarValorInput" placeholder="0.00" required autofocus>
                         </div>
+                        <small class="text-secondary">Informe o valor de mercado ou saldo atual consolidado.</small>
                     </div>
-                    <div class="modal-footer border-top p-2">
-                        <button type="button" class="btn btn-sm btn-light flex-grow-1" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-sm btn-primary flex-grow-1 fw-semibold">Salvar Novo Saldo</button>
+                    <div class="modal-footer border-top bg-light p-3 d-flex gap-2">
+                        <button type="button" class="btn btn-light border px-3 flex-fill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-3 flex-fill fw-semibold shadow-sm">Salvar Saldo</button>
                     </div>
                 </form>
             </div>

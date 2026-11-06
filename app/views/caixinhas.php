@@ -156,8 +156,8 @@ $metasConcluidas = count(array_filter($listaCaixinhas, fn($c) => $c['current_amo
                 <p class="text-secondary small mb-0 mt-1">Separe e acompanhe o dinheiro reservado para os seus sonhos e objetivos.</p>
             </div>
             <div>
-                <button type="button" class="btn btn-primary px-4 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNovaCaixinha">
-                    <i class="bi bi-plus-lg me-1"></i> Nova Caixinha
+                <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalNovaCaixinha">
+                    <i class="bi bi-plus-lg"></i> Nova Caixinha
                 </button>
             </div>
         </div>
@@ -296,10 +296,18 @@ $metasConcluidas = count(array_filter($listaCaixinhas, fn($c) => $c['current_amo
     <!-- Modal Nova Caixinha -->
     <div class="modal fade" id="modalNovaCaixinha" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow rounded-4">
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-bold">Criar Nova Caixinha</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-bottom bg-light px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-subtle text-primary p-2 rounded-3">
+                            <i class="bi bi-piggy-bank-fill fs-5"></i>
+                        </span>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Criar Nova Caixinha</h5>
+                            <span class="text-secondary small" style="font-size: 0.75rem;">Defina sua meta financeira e comece a poupar</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form action="/caixinhas" method="POST">
                     <div class="modal-body p-4">
@@ -345,9 +353,11 @@ $metasConcluidas = count(array_filter($listaCaixinhas, fn($c) => $c['current_amo
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-top">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Criar Caixinha</button>
+                    <div class="modal-footer border-top bg-light px-4 py-3">
+                        <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Criar Caixinha
+                        </button>
                     </div>
                 </form>
             </div>
@@ -357,27 +367,34 @@ $metasConcluidas = count(array_filter($listaCaixinhas, fn($c) => $c['current_amo
     <!-- Modal Movimentar (Guardar ou Resgatar) -->
     <div class="modal fade" id="modalMovimentar" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0 shadow rounded-4">
-                <div class="modal-header border-bottom">
-                    <h6 class="modal-title fw-bold" id="tituloModalMovimentar">Movimentar Caixinha</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-bottom bg-light px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge p-2 rounded-3" id="badgeMovimentar" style="background-color: rgba(13, 110, 253, 0.12); color: #0d6efd;">
+                            <i class="bi bi-arrow-left-right fs-5" id="iconeMovimentar"></i>
+                        </span>
+                        <div>
+                            <h6 class="modal-title fw-bold text-dark mb-0 fs-6" id="tituloModalMovimentar">Movimentar Caixinha</h6>
+                            <span class="text-secondary small" id="movimentarNomeCaixinha" style="font-size: 0.75rem;">Caixinha</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <form action="/caixinhas/movimentar" method="POST">
                     <input type="hidden" name="caixinha_id" id="movimentarId">
                     <input type="hidden" name="operacao" id="movimentarOperacao" value="guardar">
 
                     <div class="modal-body p-4 text-center">
-                        <p class="text-secondary small mb-3" id="movimentarNomeCaixinha">Caixinha</p>
-                        
                         <div class="input-group mb-2">
                             <span class="input-group-text bg-white border-end-0">R$</span>
                             <input type="number" step="0.01" min="0.01" class="form-control form-control-lg text-end fw-bold" 
                                 name="valor" placeholder="0.00" required autofocus>
                         </div>
+                        <small class="text-secondary" id="dicaOperacao">Digite o valor que deseja depositar ou retirar.</small>
                     </div>
-                    <div class="modal-footer border-top p-2">
-                        <button type="button" class="btn btn-sm btn-light flex-grow-1" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-sm btn-primary flex-grow-1 fw-semibold" id="btnConfirmarMovimentar">Confirmar</button>
+                    <div class="modal-footer border-top bg-light p-3 d-flex gap-2">
+                        <button type="button" class="btn btn-light border px-3 flex-fill" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-3 flex-fill fw-semibold shadow-sm" id="btnConfirmarMovimentar">Confirmar</button>
                     </div>
                 </form>
             </div>
@@ -404,15 +421,21 @@ $metasConcluidas = count(array_filter($listaCaixinhas, fn($c) => $c['current_amo
 
             const titulo = document.getElementById('tituloModalMovimentar');
             const btn = document.getElementById('btnConfirmarMovimentar');
+            const badge = document.getElementById('badgeMovimentar');
+            const icone = document.getElementById('iconeMovimentar');
 
             if (tipo === 'resgatar') {
                 titulo.innerText = 'Resgatar Valor';
-                btn.className = 'btn btn-sm btn-danger flex-grow-1 fw-semibold';
+                btn.className = 'btn btn-danger px-3 flex-fill fw-semibold shadow-sm';
                 btn.innerText = 'Confirmar Resgate';
+                if (badge) badge.className = 'badge bg-danger-subtle text-danger p-2 rounded-3';
+                if (icone) icone.className = 'bi bi-arrow-up-right fs-5';
             } else {
                 titulo.innerText = 'Guardar Valor';
-                btn.className = 'btn btn-sm btn-success flex-grow-1 fw-semibold';
+                btn.className = 'btn btn-success px-3 flex-fill fw-semibold shadow-sm';
                 btn.innerText = 'Confirmar Depósito';
+                if (badge) badge.className = 'badge bg-success-subtle text-success p-2 rounded-3';
+                if (icone) icone.className = 'bi bi-arrow-down-left fs-5';
             }
         });
     </script>

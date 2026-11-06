@@ -261,8 +261,8 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                <button type="button" class="btn btn-outline-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNovaVariavel">
-                    <i class="bi bi-plus-lg me-1"></i> Nova Variável
+                <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalNovaVariavel">
+                    <i class="bi bi-plus-lg"></i> Nova Variável
                 </button>
                 <a href="/variaveis" class="btn btn-light btn-sm border px-3">
                     <i class="bi bi-gear me-1"></i> Gerenciar Campos

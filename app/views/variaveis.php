@@ -123,12 +123,12 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                 <h1 class="h3 fw-bold text-dark mb-0">Minhas Variáveis de Orçamento</h1>
                 <p class="text-secondary small mb-0 mt-1">Gerencie os campos personalizados de receita e despesa que aparecem no seu orçamento mensal.</p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="/orcamento" class="btn btn-light border px-3">
+            <div class="d-flex align-items-center gap-2">
+                <a href="/orcamento" class="btn btn-light btn-sm border px-3">
                     <i class="bi bi-arrow-left me-1"></i> Ir para Orçamento
                 </a>
-                <button type="button" class="btn btn-primary px-4 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNovaVariavel">
-                    <i class="bi bi-plus-lg me-1"></i> Nova Variável
+                <button type="button" class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalNovaVariavel">
+                    <i class="bi bi-plus-lg"></i> Nova Variável
                 </button>
             </div>
         </div>
