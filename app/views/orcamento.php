@@ -112,37 +112,19 @@ if ($proximoMes > 12) {
                 </ul>
 
                 <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-                    <!-- Perfil Dropdown -->
-                    <div class="dropdown">
-                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="avatar-sm me-2"><?php echo htmlspecialchars($iniciais); ?></span>
-                            <div class="d-none d-md-block text-start me-1">
-                                <span class="d-block fw-semibold small text-truncate" style="max-width: 130px;">
-                                    <?php echo htmlspecialchars($primeiroNome); ?>
-                                </span>
-                                <span class="d-block text-secondary small" style="font-size: 0.75rem;">
-                                    Minha Conta
-                                </span>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                            <li class="px-3 py-2 border-bottom">
-                                <p class="mb-0 fw-semibold text-dark small"><?php echo htmlspecialchars($nomeCompleto); ?></p>
-                                <p class="mb-0 text-muted small" style="font-size: 0.75rem;"><?php echo htmlspecialchars($emailUsuario); ?></p>
-                            </li>
-                            <li><a class="dropdown-item py-2 small active" href="/orcamento"><i class="bi bi-calendar2-range me-2 text-secondary"></i> Orçamento Mensal</a></li>
-                            <li><a class="dropdown-item py-2 small" href="/variaveis"><i class="bi bi-sliders me-2 text-secondary"></i> Minhas Variáveis</a></li>
-                            <li><a class="dropdown-item py-2 small" href="/caixinhas"><i class="bi bi-piggy-bank me-2 text-secondary"></i> Caixinhas</a></li>
-                            <li><a class="dropdown-item py-2 small" href="/investimentos"><i class="bi bi-graph-up-arrow me-2 text-secondary"></i> Investimentos</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item py-2 small text-danger" href="/logout">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Encerrar Sessão
-                                </a>
-                            </li>
-                        </ul>
+                    <!-- Usuário -->
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="avatar-sm"><?php echo htmlspecialchars($iniciais); ?></span>
+                        <span class="d-none d-md-inline fw-semibold small text-dark text-truncate" style="max-width: 140px;">
+                            <?php echo htmlspecialchars($primeiroNome); ?>
+                        </span>
                     </div>
+
+                    <!-- Botão Logout -->
+                    <a href="/logout" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 py-1 px-2 fw-medium" title="Encerrar Sessão">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-sm-inline">Sair</span>
+                    </a>
                 </div>
             </div>
         </div>
