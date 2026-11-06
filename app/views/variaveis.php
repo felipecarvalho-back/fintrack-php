@@ -174,7 +174,9 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                             <?php if ($item['isFixo']): ?>
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
                                             <?php else: ?>
-                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-calendar-event me-1"></i> Apenas do mês</span>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="<?php echo htmlspecialchars($item['mesesFormatados'] ?? ''); ?>">
+                                                    <i class="bi bi-calendar-event me-1"></i> <?php echo htmlspecialchars($item['mesesFormatados'] ?? 'Apenas do mês'); ?>
+                                                </span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center pe-3">
@@ -235,7 +237,9 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                             <?php if ($item['isFixo']): ?>
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
                                             <?php else: ?>
-                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-calendar-event me-1"></i> Apenas do mês</span>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="<?php echo htmlspecialchars($item['mesesFormatados'] ?? ''); ?>">
+                                                    <i class="bi bi-calendar-event me-1"></i> <?php echo htmlspecialchars($item['mesesFormatados'] ?? 'Apenas do mês'); ?>
+                                                </span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center pe-3">
@@ -340,25 +344,42 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Frequência da Variável</label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <input type="radio" class="btn-check" name="is_fixo" id="varAplicaTodosMeses" value="1" 
-                                        <?php echo (!isset($dadosModal['is_fixo']) || !empty($dadosModal['is_fixo'])) ? 'checked' : ''; ?>>
-                                    <label class="btn btn-outline-primary w-100 text-start p-2 h-100" for="varAplicaTodosMeses">
-                                        <span class="fw-bold d-block small"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
-                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Conta que tenho todo mês</span>
-                                    </label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="radio" class="btn-check" name="is_fixo" id="varAplicaApenasMes" value="0"
-                                        <?php echo (isset($dadosModal['is_fixo']) && empty($dadosModal['is_fixo'])) ? 'checked' : ''; ?>>
-                                    <label class="btn btn-outline-secondary w-100 text-start p-2 h-100" for="varAplicaApenasMes">
-                                        <span class="fw-bold d-block small"><i class="bi bi-calendar-event me-1"></i> Apenas do mês</span>
-                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Gasto ou ganho pontual</span>
-                                    </label>
-                                </div>
+                            <label class="form-label small fw-semibold text-secondary">Meses em que a Variável se Aplica</label>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2" onclick="selecionarTodosMeses('var_mes_')">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Todos os meses
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="selecionarApenasMes('var_mes_', <?php echo (int) date('n'); ?>)">
+                                    <i class="bi bi-calendar-event me-1"></i> Apenas mês atual
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-light text-muted border py-1 px-2" onclick="limparMeses('var_mes_')">
+                                    Limpar
+                                </button>
                             </div>
+
+                            <div class="row g-1 text-center">
+                                <?php
+                                $siglasMeses = [
+                                    1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr',
+                                    5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
+                                    9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'
+                                ];
+                                $mesesPreMarcados = $dadosModal['meses'] ?? range(1, 12);
+                                if (is_string($mesesPreMarcados)) {
+                                    $mesesPreMarcados = explode(',', $mesesPreMarcados);
+                                }
+                                foreach ($siglasMeses as $mNum => $mSigla):
+                                    $isChecked = in_array($mNum, $mesesPreMarcados) || in_array((string)$mNum, $mesesPreMarcados);
+                                ?>
+                                <div class="col-3 col-sm-2">
+                                    <input type="checkbox" class="btn-check" name="meses[]" id="var_mes_<?php echo $mNum; ?>" value="<?php echo $mNum; ?>" <?php echo $isChecked ? 'checked' : ''; ?>>
+                                    <label class="btn btn-sm btn-outline-primary w-100 py-1" for="var_mes_<?php echo $mNum; ?>">
+                                        <?php echo $mSigla; ?>
+                                    </label>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <small class="text-secondary d-block mt-1">Marque os meses em que esta variável deve entrar no orçamento.</small>
                         </div>
                     </div>
                     <div class="modal-footer border-top">
@@ -398,6 +419,20 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
         if (tipoCalcSimples && tipoCalcMultiplicador) {
             tipoCalcSimples.addEventListener('change', atualizarModoModalVariavel);
             tipoCalcMultiplicador.addEventListener('change', atualizarModoModalVariavel);
+        }
+
+        function selecionarTodosMeses(prefixo) {
+            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = true);
+        }
+
+        function selecionarApenasMes(prefixo, mes) {
+            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = false);
+            const alvo = document.getElementById(prefixo + mes);
+            if (alvo) alvo.checked = true;
+        }
+
+        function limparMeses(prefixo) {
+            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = false);
         }
     </script>
 

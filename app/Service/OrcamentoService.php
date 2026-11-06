@@ -62,20 +62,18 @@ class OrcamentoService
             $tipoCalculo = $var->getTipoCalculo();
             $labelMultiplicador = $var->getLabelMultiplicador() ?? 'Dias';
 
+            // Verifica se a variável se aplica a este mês
+            $aplicaNesteMes = $var->aplicaNoMes($mes);
+
             if (isset($mapaValores[$varId])) {
                 // Já existe lançamento salvo especificamente para este mês
                 $salvo = $mapaValores[$varId];
                 $quantidade = (float) $salvo['quantidade'];
                 $valorUnitario = (float) $salvo['valor_unitario'];
                 $valorAtual = (float) $salvo['valor'];
-            } else {
-                // Este mês ainda não possui lançamento salvo para esta variável:
-                // Se NÃO for fixo (is_fixo = 0), NÃO deve se propagar para outros meses
-                if (!$var->isFixo()) {
-                    continue;
-                }
-
-                // Se for FIXO (is_fixo = 1), repete todo mês herdando o último valor salvo mais recente ou o padrão
+            } elseif ($aplicaNesteMes) {
+                // Não tem lançamento salvo neste mês, mas a variável está programada para este mês:
+                // Herda o último valor salvo mais recente ou o padrão cadastrado
                 $ultimoSalvo = $this->financaRepository->buscarUltimoValorSalvo($contaId, $varId, $ano, $mes);
                 if ($ultimoSalvo !== null) {
                     $quantidade = (float) $ultimoSalvo['quantidade'];
@@ -90,6 +88,9 @@ class OrcamentoService
                         ? ($quantidade * $valorUnitario) 
                         : $var->getValorPadrao();
                 }
+            } else {
+                // Não se aplica a este mês e não tem lançamento salvo
+                continue;
             }
 
             $item = [
@@ -103,6 +104,9 @@ class OrcamentoService
                 'valor_unitario'      => $valorUnitario,
                 'valor'               => $valorAtual,
                 'is_fixo'             => $var->isFixo(),
+                'meses_aplicaveis'    => $var->getMesesAplicaveis(),
+                'meses_formatados'    => $var->getMesesFormatados(),
+                'meses_array'         => $var->getMesesArray(),
             ];
 
             if ($var->getTipo() === TipoVariavel::Receita) {

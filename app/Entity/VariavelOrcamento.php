@@ -18,7 +18,8 @@ class VariavelOrcamento
         private float $valorPadrao,
         private int $ordem = 0,
         private TipoCalculo $tipoCalculo = TipoCalculo::Simples,
-        private ?string $labelMultiplicador = 'Dias'
+        private ?string $labelMultiplicador = 'Dias',
+        private ?string $mesesAplicaveis = null
     ) {}
 
     public function getId(): ?int
@@ -71,6 +72,67 @@ class VariavelOrcamento
         return $this->ordem;
     }
 
+    public function getMesesAplicaveis(): ?string
+    {
+        return $this->mesesAplicaveis;
+    }
+
+    /**
+     * Retorna um array com os números dos meses (1 a 12) onde a variável se aplica.
+     */
+    public function getMesesArray(): array
+    {
+        if ($this->mesesAplicaveis === null || trim($this->mesesAplicaveis) === '') {
+            return range(1, 12);
+        }
+
+        $partes = explode(',', $this->mesesAplicaveis);
+        $meses = [];
+        foreach ($partes as $p) {
+            $m = (int) trim($p);
+            if ($m >= 1 && $m <= 12) {
+                $meses[] = $m;
+            }
+        }
+        sort($meses);
+
+        return !empty($meses) ? array_values(array_unique($meses)) : range(1, 12);
+    }
+
+    /**
+     * Verifica se a variável deve ser exibida/aplicada no mês informado (1 a 12).
+     */
+    public function aplicaNoMes(int $mes): bool
+    {
+        return in_array($mes, $this->getMesesArray(), true);
+    }
+
+    /**
+     * Retorna a descrição amigável dos meses aplicáveis (ex: "Todos os meses", "Jan, Fev" ou "Novembro").
+     */
+    public function getMesesFormatados(): string
+    {
+        $meses = $this->getMesesArray();
+        if (count($meses) === 12) {
+            return 'Todos os meses';
+        }
+
+        $siglas = [
+            1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr',
+            5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
+            9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'
+        ];
+
+        $res = [];
+        foreach ($meses as $m) {
+            if (isset($siglas[$m])) {
+                $res[] = $siglas[$m];
+            }
+        }
+
+        return !empty($res) ? implode(', ', $res) : 'Todos os meses';
+    }
+
     public function toArray(): array
     {
         return [
@@ -81,6 +143,9 @@ class VariavelOrcamento
             'tipoCalculo'        => $this->tipoCalculo->value,
             'labelMultiplicador' => $this->labelMultiplicador,
             'isFixo'             => $this->isFixo,
+            'mesesAplicaveis'    => $this->mesesAplicaveis,
+            'mesesArray'         => $this->getMesesArray(),
+            'mesesFormatados'    => $this->getMesesFormatados(),
             'valorPadrao'        => $this->valorPadrao,
             'ordem'              => $this->ordem,
         ];

@@ -68,8 +68,8 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
                     </span>
                 <?php endif; ?>
                 <?php if ($isPontual): ?>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small py-1" style="font-size: 0.7rem;">
-                        <i class="bi bi-calendar-event me-1"></i> Apenas deste mês
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small py-1" style="font-size: 0.7rem;" title="<?php echo htmlspecialchars($item['meses_formatados'] ?? ''); ?>">
+                        <i class="bi bi-calendar-event me-1"></i> <?php echo htmlspecialchars($item['meses_formatados'] ?? 'Apenas deste mês'); ?>
                     </span>
                 <?php endif; ?>
             </div>
@@ -513,23 +513,37 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Onde esta variável deve aparecer?</label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <input type="radio" class="btn-check" name="is_fixo" id="aplicaTodosMeses" value="1" checked>
-                                    <label class="btn btn-outline-primary w-100 text-start p-2 h-100" for="aplicaTodosMeses">
-                                        <span class="fw-bold d-block small"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
-                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Conta que tenho todo mês</span>
-                                    </label>
-                                </div>
-                                <div class="col-6">
-                                    <input type="radio" class="btn-check" name="is_fixo" id="aplicaApenasMes" value="0">
-                                    <label class="btn btn-outline-secondary w-100 text-start p-2 h-100" for="aplicaApenasMes">
-                                        <span class="fw-bold d-block small"><i class="bi bi-calendar-event me-1"></i> Apenas deste mês</span>
-                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Gasto ou ganho pontual</span>
-                                    </label>
-                                </div>
+                            <label class="form-label small fw-semibold text-secondary">Meses em que a Variável se Aplica</label>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2" onclick="selecionarTodosMeses('orc_mes_')">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Todos os meses
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="selecionarApenasMes('orc_mes_', <?php echo (int) $mesAtual; ?>)">
+                                    <i class="bi bi-calendar-event me-1"></i> Apenas <?php echo $nomeMesAtual; ?>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-light text-muted border py-1 px-2" onclick="limparMeses('orc_mes_')">
+                                    Limpar
+                                </button>
                             </div>
+
+                            <div class="row g-1 text-center">
+                                <?php
+                                $siglasMeses = [
+                                    1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr',
+                                    5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
+                                    9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'
+                                ];
+                                foreach ($siglasMeses as $mNum => $mSigla):
+                                ?>
+                                <div class="col-3 col-sm-2">
+                                    <input type="checkbox" class="btn-check" name="meses[]" id="orc_mes_<?php echo $mNum; ?>" value="<?php echo $mNum; ?>" checked>
+                                    <label class="btn btn-sm btn-outline-primary w-100 py-1" for="orc_mes_<?php echo $mNum; ?>">
+                                        <?php echo $mSigla; ?>
+                                    </label>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <small class="text-secondary d-block mt-1">Marque os meses em que esta variável deve entrar no orçamento.</small>
                         </div>
                     </div>
                     <div class="modal-footer border-top">
@@ -647,6 +661,20 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
                     document.getElementById('modalTipoReceita').checked = true;
                 }
             });
+        }
+
+        function selecionarTodosMeses(prefixo) {
+            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = true);
+        }
+
+        function selecionarApenasMes(prefixo, mes) {
+            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = false);
+            const alvo = document.getElementById(prefixo + mes);
+            if (alvo) alvo.checked = true;
+        }
+
+        function limparMeses(prefixo) {
+            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = false);
         }
 
         // Calcular ao carregar a página

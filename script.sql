@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS variaveis_orcamento (
     tipo_calculo ENUM('simples', 'multiplicador') DEFAULT 'simples',-- 'simples' (R$ direto) ou 'multiplicador' (Qtd * Unitário)
     label_multiplicador VARCHAR(50) DEFAULT 'Dias',                 -- Ex: "Dias trabalhados", "Horas", "Unidades"
     is_fixo BOOLEAN DEFAULT TRUE,                                   -- Se costuma se repetir todo mês
+    meses_aplicaveis VARCHAR(100) NULL DEFAULT NULL,                -- Ex: '1,2,3,4,5,6,7,8,9,10,11,12' ou '11'
     valor_padrao DECIMAL(10, 2) DEFAULT 0.00,                      -- Valor ou Valor Unitário sugerido
     ordem INT DEFAULT 0,                                            -- Para ordenar na interface
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +92,8 @@ CREATE TABLE IF NOT EXISTS investments (
 -- ==============================================================================
 -- ALTER TABLE variaveis_orcamento 
 --     ADD COLUMN IF NOT EXISTS tipo_calculo ENUM('simples', 'multiplicador') DEFAULT 'simples' AFTER tipo,
---     ADD COLUMN IF NOT EXISTS label_multiplicador VARCHAR(50) DEFAULT 'Dias' AFTER tipo_calculo;
+--     ADD COLUMN IF NOT EXISTS label_multiplicador VARCHAR(50) DEFAULT 'Dias' AFTER tipo_calculo,
+--     ADD COLUMN IF NOT EXISTS meses_aplicaveis VARCHAR(100) NULL DEFAULT NULL AFTER is_fixo;
 
 -- ALTER TABLE valores_mensais 
 --     ADD COLUMN IF NOT EXISTS quantidade DECIMAL(10, 2) NULL DEFAULT 1.00 AFTER variavel_id,

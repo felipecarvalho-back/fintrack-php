@@ -30,8 +30,41 @@ class VariavelOrcamentoService
         $tipoCalculoRaw = strtolower(trim((string) ($dados['tipo_calculo'] ?? 'simples')));
         $labelMultiplicador = trim((string) ($dados['label_multiplicador'] ?? 'Dias'));
         $valorPadraoRaw = $dados['valor_padrao'] ?? 0.0;
-        $isFixo = !empty($dados['is_fixo']);
         $ordem = (int) ($dados['ordem'] ?? 0);
+
+        // Processar meses aplicáveis (1 a 12)
+        $mesesRecebidos = $dados['meses'] ?? null;
+        $mesesArray = [];
+        if (is_array($mesesRecebidos)) {
+            foreach ($mesesRecebidos as $m) {
+                $mInt = (int) $m;
+                if ($mInt >= 1 && $mInt <= 12) {
+                    $mesesArray[] = $mInt;
+                }
+            }
+        } elseif (is_string($mesesRecebidos) && trim($mesesRecebidos) !== '') {
+            foreach (explode(',', $mesesRecebidos) as $m) {
+                $mInt = (int) trim($m);
+                if ($mInt >= 1 && $mInt <= 12) {
+                    $mesesArray[] = $mInt;
+                }
+            }
+        }
+
+        // Se nenhum mês foi marcado explicitamente nas checkboxes:
+        if (empty($mesesArray)) {
+            $mesContexto = isset($dados['mes']) ? (int) $dados['mes'] : 0;
+            if ($mesContexto >= 1 && $mesContexto <= 12 && isset($dados['is_fixo']) && empty($dados['is_fixo'])) {
+                $mesesArray = [$mesContexto];
+            } else {
+                $mesesArray = range(1, 12);
+            }
+        }
+
+        sort($mesesArray);
+        $mesesArray = array_values(array_unique($mesesArray));
+        $mesesAplicaveis = implode(',', $mesesArray);
+        $isFixo = (count($mesesArray) === 12);
 
         if (empty($nome)) {
             throw new InvalidArgumentException("O nome do campo é obrigatório.");
@@ -64,7 +97,8 @@ class VariavelOrcamentoService
             valorPadrao: $valorPadrao,
             ordem: $ordem,
             tipoCalculo: $tipoCalculo,
-            labelMultiplicador: !empty($labelMultiplicador) ? $labelMultiplicador : 'Dias'
+            labelMultiplicador: !empty($labelMultiplicador) ? $labelMultiplicador : 'Dias',
+            mesesAplicaveis: $mesesAplicaveis
         );
 
         return $this->repository->inserir($variavel);

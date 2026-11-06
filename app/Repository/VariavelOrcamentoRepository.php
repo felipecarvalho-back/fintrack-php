@@ -21,8 +21,8 @@ class VariavelOrcamentoRepository
             ? $variavel->getOrdem()
             : $this->proximaOrdem($variavel->getContaId(), $variavel->getTipo()->value);
 
-        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, valor_padrao, ordem)
-                VALUES (:conta_id, :nome, :tipo, :tipo_calculo, :label_multiplicador, :is_fixo, :valor_padrao, :ordem)";
+        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, meses_aplicaveis, valor_padrao, ordem)
+                VALUES (:conta_id, :nome, :tipo, :tipo_calculo, :label_multiplicador, :is_fixo, :meses_aplicaveis, :valor_padrao, :ordem)";
 
         $stmt = $this->pdo->prepare($sql);
 
@@ -33,6 +33,7 @@ class VariavelOrcamentoRepository
             ':tipo_calculo'        => $variavel->getTipoCalculo()->value,
             ':label_multiplicador' => $variavel->getLabelMultiplicador() ?? 'Dias',
             ':is_fixo'             => $variavel->getIsFixo() ? 1 : 0,
+            ':meses_aplicaveis'    => $variavel->getMesesAplicaveis(),
             ':valor_padrao'        => $variavel->getValorPadrao(),
             ':ordem'               => $ordem
         ]);
@@ -42,7 +43,7 @@ class VariavelOrcamentoRepository
 
     public function buscarPorConta(int $contaId): array
     {
-        $sql = "SELECT id, conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, valor_padrao, ordem 
+        $sql = "SELECT id, conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, meses_aplicaveis, valor_padrao, ordem 
                 FROM variaveis_orcamento 
                 WHERE conta_id = :conta_id 
                 ORDER BY tipo ASC, ordem ASC, id ASC";
@@ -65,7 +66,8 @@ class VariavelOrcamentoRepository
                 valorPadrao: (float) $row['valor_padrao'],
                 ordem: (int) $row['ordem'],
                 tipoCalculo: $tipoCalculo,
-                labelMultiplicador: (string) ($row['label_multiplicador'] ?? 'Dias')
+                labelMultiplicador: (string) ($row['label_multiplicador'] ?? 'Dias'),
+                mesesAplicaveis: isset($row['meses_aplicaveis']) ? (string) $row['meses_aplicaveis'] : null
             );
         }
 
@@ -100,19 +102,21 @@ class VariavelOrcamentoRepository
             ['nome' => 'Cartão de Crédito', 'tipo' => 'despesa', 'is_fixo' => 1, 'valor' => 0.0, 'ordem' => 5],
         ];
 
-        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, is_fixo, valor_padrao, ordem) 
-                VALUES (:conta_id, :nome, :tipo, :is_fixo, :valor_padrao, :ordem)";
+        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, is_fixo, meses_aplicaveis, valor_padrao, ordem) 
+                VALUES (:conta_id, :nome, :tipo, :is_fixo, :meses_aplicaveis, :valor_padrao, :ordem)";
 
         $stmt = $this->pdo->prepare($sql);
 
         foreach ($padroes as $item) {
+            $meses = !empty($item['is_fixo']) ? '1,2,3,4,5,6,7,8,9,10,11,12' : (string) (int) date('n');
             $stmt->execute([
-                ':conta_id'     => $contaId,
-                ':nome'         => $item['nome'],
-                ':tipo'         => $item['tipo'],
-                ':is_fixo'      => $item['is_fixo'],
-                ':valor_padrao' => $item['valor'],
-                ':ordem'        => $item['ordem'],
+                ':conta_id'          => $contaId,
+                ':nome'              => $item['nome'],
+                ':tipo'              => $item['tipo'],
+                ':is_fixo'           => $item['is_fixo'],
+                ':meses_aplicaveis' => $meses,
+                ':valor_padrao'      => $item['valor'],
+                ':ordem'             => $item['ordem'],
             ]);
         }
     }
