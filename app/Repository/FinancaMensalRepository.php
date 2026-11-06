@@ -114,21 +114,21 @@ class FinancaMensalRepository
      */
     public function buscarUltimoValorSalvo(int $contaId, int $variavelId, int $ano, int $mes): ?array
     {
+        $periodoAtual = ($ano * 100) + $mes;
         $sql = "SELECT vm.quantidade, vm.valor_unitario, vm.valor
                 FROM valores_mensais vm
                 INNER JOIN financas_mensais fm ON fm.id = vm.financa_mensal_id
                 WHERE fm.conta_id = :conta_id 
                   AND vm.variavel_id = :variavel_id
-                  AND (fm.ano < :ano OR (fm.ano = :ano AND fm.mes < :mes))
+                  AND ((fm.ano * 100) + fm.mes) < :periodo_atual
                 ORDER BY fm.ano DESC, fm.mes DESC
                 LIMIT 1";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':conta_id'    => $contaId,
-            ':variavel_id' => $variavelId,
-            ':ano'         => $ano,
-            ':mes'         => $mes,
+            ':conta_id'       => $contaId,
+            ':variavel_id'    => $variavelId,
+            ':periodo_atual'  => $periodoAtual,
         ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
