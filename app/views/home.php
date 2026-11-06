@@ -4,6 +4,17 @@ $nomeCompleto = $usuario['nomeCompleto'] ?? 'Usuário FinTrack';
 $primeiroNome = explode(' ', trim($nomeCompleto))[0];
 $iniciais = strtoupper(substr($primeiroNome, 0, 1) . (isset(explode(' ', trim($nomeCompleto))[1]) ? substr(explode(' ', trim($nomeCompleto))[1], 0, 1) : ''));
 $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
+
+$mesesNomes = [
+    1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
+    5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+    9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+];
+$nomeMes = $mesesNomes[$mesAtual ?? (int)date('n')] ?? 'Mês Atual';
+$ano = $anoAtual ?? (int)date('Y');
+
+// Porcentagem de comprometimento da renda
+$pctDespesas = ($totalReceitas ?? 0) > 0 ? min(100, round((($totalDespesas ?? 0) / $totalReceitas) * 100)) : 0;
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" data-bs-theme="light">
@@ -77,21 +88,10 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
 
                 <!-- Área do Usuário -->
                 <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-                    <!-- Seletor de Período -->
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-light border dropdown-toggle fw-medium text-secondary"
-                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-calendar3 me-1"></i> Este Mês (Novembro)
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                            <li><a class="dropdown-item active" href="#">Novembro 2026</a></li>
-                            <li><a class="dropdown-item" href="#">Outubro 2026</a></li>
-                            <li><a class="dropdown-item" href="#">Setembro 2026</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Personalizado...</a></li>
-                        </ul>
-                    </div>
-
+                    <!-- Seletor do Mês Atual -->
+                    <a href="/orcamento/<?php echo $ano; ?>/<?php echo $mesAtual ?? date('n'); ?>" class="btn btn-sm btn-light border fw-medium text-secondary">
+                        <i class="bi bi-calendar3 me-1 text-primary"></i> <?php echo $nomeMes; ?> <?php echo $ano; ?>
+                    </a>
 
                     <!-- Perfil Dropdown -->
                     <div class="dropdown">
@@ -112,9 +112,8 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                                 <p class="mb-0 fw-semibold text-dark small"><?php echo htmlspecialchars($nomeCompleto); ?></p>
                                 <p class="mb-0 text-muted small" style="font-size: 0.75rem;"><?php echo htmlspecialchars($emailUsuario); ?></p>
                             </li>
-                            <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-person me-2 text-secondary"></i> Meu Perfil</a></li>
                             <li><a class="dropdown-item py-2 small" href="/variaveis"><i class="bi bi-sliders me-2 text-secondary"></i> Minhas Variáveis</a></li>
-                            <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Configurações</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/orcamento"><i class="bi bi-calendar2-range me-2 text-secondary"></i> Orçamento</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item py-2 small text-danger" href="/logout">
@@ -136,25 +135,25 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
         <div class="row align-items-center g-3 mb-4">
             <div class="col-12 col-md-6">
                 <h3 class="fw-bold mb-1 text-dark">Olá, <?php echo htmlspecialchars($primeiroNome); ?>! 👋</h3>
-                <p class="text-secondary small mb-0">Acompanhe seu fluxo de caixa e alcance seus objetivos financeiros.</p>
+                <p class="text-secondary small mb-0">Visão consolidada das suas finanças em <strong><?php echo $nomeMes; ?> de <?php echo $ano; ?></strong>.</p>
             </div>
             <div class="col-12 col-md-6 text-md-end d-flex flex-wrap gap-2 justify-content-md-end">
-                <a href="/orcamento" class="btn btn-primary btn-action text-white">
-                    <i class="bi bi-calendar2-range me-1"></i> Orçamento Mensal
+                <a href="/orcamento" class="btn btn-primary btn-action text-white shadow-sm">
+                    <i class="bi bi-calendar2-range me-1"></i> Abrir Orçamento do Mês
                 </a>
                 <a href="/caixinhas" class="btn btn-outline-secondary btn-action bg-white border">
-                    <i class="bi bi-piggy-bank me-1"></i> Minhas Caixinhas
+                    <i class="bi bi-piggy-bank me-1"></i> Caixinhas
                 </a>
             </div>
         </div>
 
-        <!-- Cards de Resumo (KPIs Reais) -->
+        <!-- 4 Cards de Resumo Consolidado (Dados Reais) -->
         <div class="row g-3 mb-4">
             <!-- Saldo Geral -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary small fw-semibold">Saldo Previsto do Mês</span>
+                        <span class="text-secondary small fw-semibold text-uppercase tracking-wider">Saldo Previsto</span>
                         <div class="stat-icon stat-icon-primary">
                             <i class="bi bi-wallet2"></i>
                         </div>
@@ -163,8 +162,8 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                         R$ <?php echo number_format($saldoMes ?? 0.0, 2, ',', '.'); ?>
                     </h3>
                     <div class="d-flex align-items-center small text-secondary">
-                        <i class="bi bi-calendar3 me-1"></i>
-                        <span>Competência atual</span>
+                        <i class="bi bi-check2 me-1 text-success"></i>
+                        <span>Receitas menos despesas</span>
                     </div>
                 </div>
             </div>
@@ -173,14 +172,14 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary small fw-semibold">Receitas do Mês</span>
+                        <span class="text-secondary small fw-semibold text-uppercase tracking-wider">Receitas do Mês</span>
                         <div class="stat-icon stat-icon-success">
                             <i class="bi bi-arrow-down-left"></i>
                         </div>
                     </div>
                     <h3 class="fw-bold text-success mb-1">R$ <?php echo number_format($totalReceitas ?? 0.0, 2, ',', '.'); ?></h3>
                     <div class="d-flex align-items-center small text-success">
-                        <i class="bi bi-check-circle me-1"></i>
+                        <i class="bi bi-plus-circle me-1"></i>
                         <span>Entradas planejadas</span>
                     </div>
                 </div>
@@ -190,24 +189,23 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary small fw-semibold">Despesas do Mês</span>
+                        <span class="text-secondary small fw-semibold text-uppercase tracking-wider">Despesas do Mês</span>
                         <div class="stat-icon stat-icon-danger">
                             <i class="bi bi-arrow-up-right"></i>
                         </div>
                     </div>
                     <h3 class="fw-bold text-danger mb-1">R$ <?php echo number_format($totalDespesas ?? 0.0, 2, ',', '.'); ?></h3>
-                    <div class="d-flex align-items-center small text-danger">
-                        <i class="bi bi-dash-circle me-1"></i>
-                        <span>Saídas planejadas</span>
+                    <div class="d-flex align-items-center small text-secondary">
+                        <span><?php echo $pctDespesas; ?>% da renda comprometida</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Total em Caixinhas / Reserva -->
+            <!-- Total em Caixinhas / Metas -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary small fw-semibold">Total em Caixinhas</span>
+                        <span class="text-secondary small fw-semibold text-uppercase tracking-wider">Total em Caixinhas</span>
                         <div class="stat-icon stat-icon-warning">
                             <i class="bi bi-piggy-bank"></i>
                         </div>
@@ -215,342 +213,135 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                     <h3 class="fw-bold text-dark mb-1">R$ <?php echo number_format($totalCaixinhas ?? 0.0, 2, ',', '.'); ?></h3>
                     <div class="d-flex align-items-center small text-secondary">
                         <i class="bi bi-shield-check me-1 text-warning"></i>
-                        <span>Metas e reservas</span>
+                        <span><?php echo count($caixinhas ?? []); ?> metas ativas</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Seção Principal: Transações Recentes e Visão Lateral -->
-        <div class="row g-4">
+        <!-- Seção Principal: 2 Colunas com Conteúdo Real -->
+        <div class="row g-4 mb-4">
 
-            <!-- Tabela de Transações Recentes (8 colunas) -->
-            <div class="col-12 col-xl-8">
-                <div class="card-dashboard h-100">
-                    <div class="card-dashboard-header">
+            <!-- Coluna Esquerda: Cartão de Saúde do Mês & Ações Rápidas -->
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h5 class="fw-bold mb-0 text-dark">Transações Recentes</h5>
-                            <span class="text-secondary small">Suas últimas movimentações registradas</span>
+                            <h5 class="fw-bold mb-1 text-dark">Orçamento de <?php echo $nomeMes; ?></h5>
+                            <span class="text-secondary small">Balanço das suas entradas e saídas planejadas</span>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <a href="#" class="btn btn-sm btn-light border small fw-medium">
-                                Ver todas <i class="bi bi-chevron-right ms-1"></i>
-                            </a>
+                        <a href="/orcamento/<?php echo $ano; ?>/<?php echo $mesAtual ?? date('n'); ?>" class="btn btn-sm btn-outline-primary px-3">
+                            Editar Valores <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+
+                    <!-- Barra de Saúde do Mês -->
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-semibold text-dark small">Comprometimento de Renda</span>
+                            <span class="fw-bold <?php echo ($pctDespesas > 80) ? 'text-danger' : 'text-success'; ?> small">
+                                <?php echo $pctDespesas; ?>%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 6px;">
+                            <div class="progress-bar <?php echo ($pctDespesas > 80) ? 'bg-danger' : (($pctDespesas > 60) ? 'bg-warning' : 'bg-success'); ?>" 
+                                role="progressbar" 
+                                style="width: <?php echo min(100, $pctDespesas); ?>%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-secondary mt-2" style="font-size: 0.75rem;">
+                            <span>R$ 0,00</span>
+                            <span>R$ <?php echo number_format($totalReceitas ?? 0.0, 2, ',', '.'); ?> (100%)</span>
                         </div>
                     </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-custom align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Transação</th>
-                                    <th>Categoria</th>
-                                    <th>Data</th>
-                                    <th>Status</th>
-                                    <th class="text-end">Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Item 1 -->
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="transaction-icon bg-success-subtle text-success">
-                                                <i class="bi bi-cash-stack"></i>
-                                            </div>
-                                            <div>
-                                                <span class="d-block fw-semibold text-dark">Salário Mensal</span>
-                                                <span class="text-secondary small">Tech Solutions Ltda.</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-light text-secondary border">
-                                            <i class="bi bi-briefcase me-1"></i> Renda
+                    <!-- Acessos Rápidos do Módulo -->
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <a href="/variaveis" class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-white h-100 d-flex align-items-center gap-3 transition-hover">
+                                    <div class="stat-icon-sm rounded-3 p-2 bg-primary-subtle text-primary">
+                                        <i class="bi bi-sliders fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block fw-semibold text-dark">Minhas Variáveis</span>
+                                        <span class="text-secondary small" style="font-size: 0.8rem;">Adicionar ou remover campos fixos</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <a href="/investimentos" class="text-decoration-none">
+                                <div class="p-3 border rounded-3 bg-white h-100 d-flex align-items-center gap-3 transition-hover">
+                                    <div class="stat-icon-sm rounded-3 p-2 bg-success-subtle text-success">
+                                        <i class="bi bi-graph-up-arrow fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block fw-semibold text-dark">Carteira de Ativos</span>
+                                        <span class="text-secondary small" style="font-size: 0.8rem;">
+                                            Patrimônio: R$ <?php echo number_format($patrimonioInvest ?? 0.0, 2, ',', '.'); ?>
                                         </span>
-                                    </td>
-                                    <td class="text-secondary small">02 Nov, 2026</td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                            Concluído
-                                        </span>
-                                    </td>
-                                    <td class="text-end fw-bold text-success">+ R$ 6.500,00</td>
-                                </tr>
-
-                                <!-- Item 2 -->
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="transaction-icon bg-danger-subtle text-danger">
-                                                <i class="bi bi-cart3"></i>
-                                            </div>
-                                            <div>
-                                                <span class="d-block fw-semibold text-dark">Supermercado</span>
-                                                <span class="text-secondary small">Compras do Mês</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-light text-secondary border">
-                                            <i class="bi bi-basket me-1"></i> Alimentação
-                                        </span>
-                                    </td>
-                                    <td class="text-secondary small">01 Nov, 2026</td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                            Concluído
-                                        </span>
-                                    </td>
-                                    <td class="text-end fw-bold text-danger">- R$ 428,50</td>
-                                </tr>
-
-                                <!-- Item 3 -->
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="transaction-icon bg-info-subtle text-info">
-                                                <i class="bi bi-laptop"></i>
-                                            </div>
-                                            <div>
-                                                <span class="d-block fw-semibold text-dark">Projeto Freelance</span>
-                                                <span class="text-secondary small">Design UI Web</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-light text-secondary border">
-                                            <i class="bi bi-code-slash me-1"></i> Serviços
-                                        </span>
-                                    </td>
-                                    <td class="text-secondary small">29 Out, 2026</td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                            Concluído
-                                        </span>
-                                    </td>
-                                    <td class="text-end fw-bold text-success">+ R$ 1.800,00</td>
-                                </tr>
-
-                                <!-- Item 4 -->
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="transaction-icon bg-warning-subtle text-warning">
-                                                <i class="bi bi-tv"></i>
-                                            </div>
-                                            <div>
-                                                <span class="d-block fw-semibold text-dark">Streaming & Apps</span>
-                                                <span class="text-secondary small">Netflix e Spotify</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-light text-secondary border">
-                                            <i class="bi bi-controller me-1"></i> Assinaturas
-                                        </span>
-                                    </td>
-                                    <td class="text-secondary small">28 Out, 2026</td>
-                                    <td>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
-                                            Concluído
-                                        </span>
-                                    </td>
-                                    <td class="text-end fw-bold text-danger">- R$ 79,90</td>
-                                </tr>
-
-                                <!-- Item 5 -->
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="transaction-icon bg-danger-subtle text-danger">
-                                                <i class="bi bi-fuel-pump"></i>
-                                            </div>
-                                            <div>
-                                                <span class="d-block fw-semibold text-dark">Combustível</span>
-                                                <span class="text-secondary small">Posto Shell</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge rounded-pill bg-light text-secondary border">
-                                            <i class="bi bi-car-front me-1"></i> Transporte
-                                        </span>
-                                    </td>
-                                    <td class="text-secondary small">25 Out, 2026</td>
-                                    <td>
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
-                                            Pendente
-                                        </span>
-                                    </td>
-                                    <td class="text-end fw-bold text-danger">- R$ 180,00</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Painel Lateral: Cartão & Categorias (4 colunas) -->
-            <div class="col-12 col-xl-4 d-flex flex-column gap-4">
-
-                <!-- Prévia do Cartão de Crédito -->
-                <div class="card-dashboard p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h6 class="fw-bold mb-0 text-dark">Cartão Principal</h6>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Físico & Virtual</span>
+            <!-- Coluna Direita: Metas e Caixinhas Reais -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0 text-dark">Suas Caixinhas</h5>
+                            <span class="text-secondary small">Progresso dos seus objetivos</span>
+                        </div>
+                        <a href="/caixinhas" class="btn btn-sm btn-link text-primary p-0 text-decoration-none fw-semibold">
+                            Ver todas <i class="bi bi-chevron-right"></i>
+                        </a>
                     </div>
 
-                    <div class="credit-card-preview mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="credit-card-chip"></span>
-                            <i class="bi bi-wifi fs-4 opacity-75"></i>
-                        </div>
-                        <div class="mb-4">
-                            <span class="d-block text-white-50 small" style="font-size: 0.7rem; letter-spacing: 0.1em;">NÚMERO DO CARTÃO</span>
-                            <span class="fs-5 fw-bold letter-spacing-1">•••• •••• •••• 4892</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-end">
-                            <div>
-                                <span class="d-block text-white-50" style="font-size: 0.65rem;">TITULAR</span>
-                                <span class="fw-semibold small text-uppercase"><?php echo htmlspecialchars($nomeCompleto); ?></span>
+                    <?php if (empty($caixinhas)): ?>
+                        <div class="text-center py-4 my-auto">
+                            <div class="stat-icon stat-icon-warning mx-auto mb-3">
+                                <i class="bi bi-piggy-bank fs-4"></i>
                             </div>
-                            <div class="text-end">
-                                <span class="d-block text-white-50" style="font-size: 0.65rem;">VALIDADE</span>
-                                <span class="fw-semibold small">08/30</span>
-                            </div>
+                            <h6 class="fw-bold text-dark mb-1">Nenhuma caixinha criada</h6>
+                            <p class="text-secondary small mb-3">Comece separando dinheiro para sua reserva de emergência ou viagem.</p>
+                            <a href="/caixinhas" class="btn btn-sm btn-primary px-3">
+                                <i class="bi bi-plus-lg me-1"></i> Criar Caixinha
+                            </a>
                         </div>
-                    </div>
-
-                    <!-- Limite do Cartão -->
-                    <div>
-                        <div class="d-flex justify-content-between small text-secondary mb-1">
-                            <span>Limite Usado: <strong>R$ 1.180,00</strong></span>
-                            <span>Total: R$ 5.000,00</span>
+                    <?php else: ?>
+                        <div class="d-flex flex-column gap-3">
+                            <?php foreach (array_slice($caixinhas, 0, 4) as $item): 
+                                $prog = $item['target_amount'] > 0 ? min(100, round(($item['current_amount'] / $item['target_amount']) * 100)) : 0;
+                            ?>
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi <?php echo htmlspecialchars($item['icon'] ?? 'bi-piggy-bank'); ?> fs-5" style="color: <?php echo htmlspecialchars($item['color'] ?? '#0d6efd'); ?>;"></i>
+                                            <span class="fw-semibold text-dark small"><?php echo htmlspecialchars($item['name']); ?></span>
+                                        </div>
+                                        <span class="fw-bold text-dark small">R$ <?php echo number_format($item['current_amount'], 2, ',', '.'); ?></span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar" style="width: <?php echo $prog; ?>%; background-color: <?php echo htmlspecialchars($item['color'] ?? '#0d6efd'); ?>;"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-secondary mt-1" style="font-size: 0.72rem;">
+                                        <span>Meta: R$ <?php echo number_format($item['target_amount'], 2, ',', '.'); ?></span>
+                                        <span class="fw-semibold"><?php echo $prog; ?>%</span>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
                         </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: 23.6%"></div>
-                        </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
-
-                <!-- Despesas por Categoria -->
-                <div class="card-dashboard p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <h6 class="fw-bold mb-0 text-dark">Gastos por Categoria</h6>
-                        <span class="text-muted small">Este mês</span>
-                    </div>
-
-                    <div class="d-flex flex-column gap-3">
-                        <!-- Categoria 1 -->
-                        <div>
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span class="text-dark fw-medium"><i class="bi bi-house-door me-1 text-primary"></i> Moradia & Contas</span>
-                                <span class="text-dark fw-bold">R$ 1.450,00 (42%)</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-primary" style="width: 42%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Categoria 2 -->
-                        <div>
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span class="text-dark fw-medium"><i class="bi bi-cart me-1 text-success"></i> Alimentação</span>
-                                <span class="text-dark fw-bold">R$ 980,00 (28%)</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-success" style="width: 28%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Categoria 3 -->
-                        <div>
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span class="text-dark fw-medium"><i class="bi bi-car-front me-1 text-warning"></i> Transporte</span>
-                                <span class="text-dark fw-bold">R$ 540,00 (15%)</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-warning" style="width: 15%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Categoria 4 -->
-                        <div>
-                            <div class="d-flex justify-content-between small mb-1">
-                                <span class="text-dark fw-medium"><i class="bi bi-controller me-1 text-danger"></i> Lazer & Outros</span>
-                                <span class="text-dark fw-bold">R$ 499,20 (15%)</span>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-danger" style="width: 15%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
         </div>
 
     </main>
-
-    <!-- Modal de Nova Transação (Apenas Mockup Visual) -->
-    <div class="modal fade" id="modalNovaTransacao" tabindex="-1" aria-labelledby="modalNovaTransacaoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-bold" id="modalNovaTransacaoLabel">Nova Movimentação</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <form>
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Tipo</label>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="tipoTransacao" id="tipoReceita" autocomplete="off" checked>
-                                <label class="btn btn-outline-success" for="tipoReceita"><i class="bi bi-plus-circle me-1"></i> Receita</label>
-
-                                <input type="radio" class="btn-check" name="tipoTransacao" id="tipoDespesa" autocomplete="off">
-                                <label class="btn btn-outline-danger" for="tipoDespesa"><i class="bi bi-dash-circle me-1"></i> Despesa</label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label small fw-semibold text-secondary">Descrição</label>
-                            <input type="text" class="form-control" id="descricao" placeholder="Ex: Supermercado, Salário, Internet...">
-                        </div>
-
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label for="valor" class="form-label small fw-semibold text-secondary">Valor (R$)</label>
-                                <input type="number" step="0.01" class="form-control" id="valor" placeholder="0,00">
-                            </div>
-                            <div class="col-6">
-                                <label for="data" class="form-label small fw-semibold text-secondary">Data</label>
-                                <input type="date" class="form-control" id="data" value="<?php echo date('Y-m-d'); ?>">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="categoria" class="form-label small fw-semibold text-secondary">Categoria</label>
-                            <select class="form-select" id="categoria">
-                                <option value="alimentacao">Alimentação</option>
-                                <option value="moradia">Moradia</option>
-                                <option value="transporte">Transporte</option>
-                                <option value="lazer">Lazer</option>
-                                <option value="salario">Salário / Renda</option>
-                                <option value="outros">Outros</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer border-top">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary px-4">Salvar</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap 5.3.3 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
