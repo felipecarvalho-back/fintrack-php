@@ -150,6 +150,23 @@ if ($proximoMes > 12) {
     <!-- Conteúdo Principal -->
     <main class="container-fluid px-3 px-lg-4 py-4">
 
+        <!-- Mensagens de Feedback -->
+        <?php if (!empty($_SESSION['sucesso'])): ?>
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-3 py-2 small mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <?php echo htmlspecialchars($_SESSION['sucesso']); unset($_SESSION['sucesso']); ?>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['erro'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-3 py-2 small mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <?php echo htmlspecialchars($_SESSION['erro']); unset($_SESSION['erro']); ?>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <!-- Topo: Navegação do Mês e Ações Rápidas -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>

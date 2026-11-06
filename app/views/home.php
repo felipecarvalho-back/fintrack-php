@@ -139,34 +139,32 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                 <p class="text-secondary small mb-0">Acompanhe seu fluxo de caixa e alcance seus objetivos financeiros.</p>
             </div>
             <div class="col-12 col-md-6 text-md-end d-flex flex-wrap gap-2 justify-content-md-end">
-                <button class="btn btn-outline-secondary btn-action bg-white border" type="button">
-                    <i class="bi bi-download"></i> Exportar
-                </button>
-                <button class="btn btn-success btn-action text-white" type="button" data-bs-toggle="modal" data-bs-target="#modalNovaTransacao">
-                    <i class="bi bi-plus-circle"></i> Nova Receita
-                </button>
-                <button class="btn btn-danger btn-action text-white" type="button" data-bs-toggle="modal" data-bs-target="#modalNovaTransacao">
-                    <i class="bi bi-dash-circle"></i> Nova Despesa
-                </button>
+                <a href="/orcamento" class="btn btn-primary btn-action text-white">
+                    <i class="bi bi-calendar2-range me-1"></i> Orçamento Mensal
+                </a>
+                <a href="/caixinhas" class="btn btn-outline-secondary btn-action bg-white border">
+                    <i class="bi bi-piggy-bank me-1"></i> Minhas Caixinhas
+                </a>
             </div>
         </div>
 
-        <!-- Cards de Resumo (KPIs) -->
+        <!-- Cards de Resumo (KPIs Reais) -->
         <div class="row g-3 mb-4">
             <!-- Saldo Geral -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary small fw-semibold">Saldo Atual</span>
+                        <span class="text-secondary small fw-semibold">Saldo Previsto do Mês</span>
                         <div class="stat-icon stat-icon-primary">
                             <i class="bi bi-wallet2"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold text-dark mb-1">R$ 12.450,80</h3>
-                    <div class="d-flex align-items-center small text-success">
-                        <i class="bi bi-arrow-up-right me-1"></i>
-                        <span class="fw-semibold">+14.2%</span>
-                        <span class="text-secondary ms-1">vs mês anterior</span>
+                    <h3 class="fw-bold <?php echo (($saldoMes ?? 0) >= 0) ? 'text-primary' : 'text-danger'; ?> mb-1">
+                        R$ <?php echo number_format($saldoMes ?? 0.0, 2, ',', '.'); ?>
+                    </h3>
+                    <div class="d-flex align-items-center small text-secondary">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        <span>Competência atual</span>
                     </div>
                 </div>
             </div>
@@ -180,10 +178,10 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                             <i class="bi bi-arrow-down-left"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold text-dark mb-1">R$ 8.920,00</h3>
+                    <h3 class="fw-bold text-success mb-1">R$ <?php echo number_format($totalReceitas ?? 0.0, 2, ',', '.'); ?></h3>
                     <div class="d-flex align-items-center small text-success">
                         <i class="bi bi-check-circle me-1"></i>
-                        <span>3 entradas confirmadas</span>
+                        <span>Entradas planejadas</span>
                     </div>
                 </div>
             </div>
@@ -197,29 +195,27 @@ $emailUsuario = $usuario['email'] ?? 'usuario@fintrack.com';
                             <i class="bi bi-arrow-up-right"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold text-dark mb-1">R$ 3.469,20</h3>
+                    <h3 class="fw-bold text-danger mb-1">R$ <?php echo number_format($totalDespesas ?? 0.0, 2, ',', '.'); ?></h3>
                     <div class="d-flex align-items-center small text-danger">
-                        <i class="bi bi-exclamation-circle me-1"></i>
-                        <span>38% da renda mensal</span>
+                        <i class="bi bi-dash-circle me-1"></i>
+                        <span>Saídas planejadas</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Economia / Meta -->
+            <!-- Total em Caixinhas / Reserva -->
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="stat-card h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="text-secondary small fw-semibold">Meta de Reserva</span>
+                        <span class="text-secondary small fw-semibold">Total em Caixinhas</span>
                         <div class="stat-icon stat-icon-warning">
                             <i class="bi bi-piggy-bank"></i>
                         </div>
                     </div>
-                    <h3 class="fw-bold text-dark mb-1">R$ 5.451,60</h3>
-                    <div class="mt-2">
-                        <div class="progress" role="progressbar" style="height: 6px;" aria-valuenow="72" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-warning" style="width: 72%"></div>
-                        </div>
-                        <span class="d-block text-secondary small mt-1" style="font-size: 0.75rem;">72% da meta alcançada (R$ 7.500)</span>
+                    <h3 class="fw-bold text-dark mb-1">R$ <?php echo number_format($totalCaixinhas ?? 0.0, 2, ',', '.'); ?></h3>
+                    <div class="d-flex align-items-center small text-secondary">
+                        <i class="bi bi-shield-check me-1 text-warning"></i>
+                        <span>Metas e reservas</span>
                     </div>
                 </div>
             </div>
