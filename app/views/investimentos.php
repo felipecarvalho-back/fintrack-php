@@ -130,9 +130,10 @@ $rentabilidadePercentual = $totalInvestido > 0 ? ($lucroTotal / $totalInvestido)
                                 <p class="mb-0 fw-semibold text-dark small"><?php echo htmlspecialchars($nomeCompleto); ?></p>
                                 <p class="mb-0 text-muted small" style="font-size: 0.75rem;"><?php echo htmlspecialchars($emailUsuario); ?></p>
                             </li>
-                            <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-person me-2 text-secondary"></i> Meu Perfil</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/orcamento"><i class="bi bi-calendar2-range me-2 text-secondary"></i> Orçamento Mensal</a></li>
                             <li><a class="dropdown-item py-2 small" href="/variaveis"><i class="bi bi-sliders me-2 text-secondary"></i> Minhas Variáveis</a></li>
-                            <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-gear me-2 text-secondary"></i> Configurações</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/caixinhas"><i class="bi bi-piggy-bank me-2 text-secondary"></i> Caixinhas</a></li>
+                            <li><a class="dropdown-item py-2 small active" href="/investimentos"><i class="bi bi-graph-up-arrow me-2 text-secondary"></i> Investimentos</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item py-2 small text-danger" href="/logout">

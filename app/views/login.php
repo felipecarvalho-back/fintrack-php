@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $titulo ?? 'Login - Sistema Financeiro'; ?></title>
+    <title><?php echo $titulo ?? 'Entrar - FinTrack'; ?></title>
 
     <!-- Bootstrap 5.3.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -13,111 +13,85 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Estilos Customizados -->
+    <!-- Estilos de Autenticação -->
     <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
-    <div class="container p-3">
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
-                <div class="card login-card p-4 p-sm-5 mx-auto">
+    <div class="auth-card mx-3">
+        <!-- Logo e Boas-Vindas -->
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center gap-2 mb-2">
+                <span class="brand-icon-sm">
+                    <i class="bi bi-wallet2"></i>
+                </span>
+                <span class="fw-bold fs-4 text-dark tracking-tight">Fin<span class="text-primary">Track</span></span>
+            </div>
+            <p class="text-secondary small mb-0">Entre com sua conta para continuar</p>
+        </div>
 
-                    <!-- Cabeçalho / Identidade Visual -->
-                    <div class="text-center mb-4">
-                        <div class="brand-icon mb-3">
-                            <i class="bi bi-wallet2"></i>
-                        </div>
-                        <h4 class="fw-bold text-dark mb-1">Painel Financeiro</h4>
-                        <p class="text-muted small mb-0">Entre com seus dados para continuar</p>
-                    </div>
+        <!-- Formulário de Login -->
+        <form action="/login" method="POST">
+            <!-- Alerta de Erro -->
+            <?php if (!empty($_SESSION['erro'])): ?>
+                <div class="alert alert-danger py-2 small d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+                    <div><?php echo htmlspecialchars($_SESSION['erro']); ?></div>
+                </div>
+                <?php unset($_SESSION['erro']); ?>
+            <?php endif; ?>
 
-                    <!-- Formulário de Login -->
-                    <form action="/login" method="POST">
+            <!-- Alerta de Sucesso -->
+            <?php if (!empty($_SESSION['sucesso'])): ?>
+                <div class="alert alert-success py-2 small d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-check-circle-fill me-2 fs-6"></i>
+                    <div><?php echo htmlspecialchars($_SESSION['sucesso']); ?></div>
+                </div>
+                <?php unset($_SESSION['sucesso']); ?>
+            <?php endif; ?>
 
-                        <!-- Alerta de Erro -->
-                        <?php if (!empty($_SESSION['erro'])): ?>
-                            <div class="alert alert-danger theme-danger py-2 small d-flex align-items-center mb-3" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
-                                <div>
-                                    <?php echo htmlspecialchars($_SESSION['erro']); ?>
-                                </div>
-                            </div>
-                            <?php unset($_SESSION['erro']); ?>
-                        <?php endif; ?>
+            <!-- Campo E-mail -->
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold text-secondary">E-mail</label>
+                <input type="email" class="form-control" id="email" name="email"
+                    placeholder="seu@email.com" required autocomplete="username">
+            </div>
 
-                        <!-- Alerta de Sucesso -->
-                        <?php if (!empty($_SESSION['sucesso'])): ?>
-                            <div class="alert alert-success theme-success py-2 small d-flex align-items-center mb-3" role="alert">
-                                <i class="bi bi-check-circle-fill me-2 fs-6"></i>
-                                <div><?php echo htmlspecialchars($_SESSION['sucesso']); ?></div>
-                            </div>
-                            <?php unset($_SESSION['sucesso']); ?>
-                        <?php endif; ?>
-
-                        <!-- Campo de E-mail / Usuário -->
-                        <div class="mb-3">
-                            <label for="email" class="form-label small fw-semibold text-secondary">E-mail ou
-                                Usuário</label>
-                            <div class="input-group input-group-integrated">
-                                <span class="input-group-text pe-2">
-                                    <i class="bi bi-envelope"></i>
-                                </span>
-                                <input type="email" class="form-control ps-1" id="email" name="email"
-                                    placeholder="seu@email.com" required autocomplete="username">
-                            </div>
-                        </div>
-
-                        <!-- Campo de Senha -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <label for="senha" class="form-label small fw-semibold text-secondary">Senha</label>
-                                <a href="#" class="small text-decoration-none text-primary">Esqueceu?</a>
-                            </div>
-                            <div class="input-group input-group-integrated">
-                                <span class="input-group-text pe-2">
-                                    <i class="bi bi-lock"></i>
-                                </span>
-                                <input type="password" class="form-control ps-1" id="senha" name="senha"
-                                    placeholder="••••••••" required autocomplete="current-password">
-                                <button class="btn text-muted" type="button" id="toggleSenha"
-                                    aria-label="Mostrar ou ocultar senha">
-                                    <i class="bi bi-eye" id="toggleIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Lembrar-me -->
-                        <div class="form-check mb-4">
-                            <input class="form-check-input" type="checkbox" id="lembrar" name="lembrar">
-                            <label class="form-check-label small text-secondary" for="lembrar">
-                                Lembrar neste dispositivo
-                            </label>
-                        </div>
-
-                        <!-- Botão de Acesso -->
-                        <button type="submit" class="btn btn-primary btn-login w-100 mb-3 shadow-sm">
-                            Entrar no Sistema
-                        </button>
-
-                        <!-- Link para Cadastro -->
-                        <div class="text-center mb-3">
-                            <span class="small text-muted">Não possui uma conta? </span>
-                            <a href="/cadastro"
-                                class="small fw-semibold text-primary text-decoration-none">Cadastre-se</a>
-                        </div>
-
-                        <!-- Indicador de Segurança -->
-                        <div class="text-center mt-3 pt-3 border-top">
-                            <span class="text-muted small d-inline-flex align-items-center gap-1">
-                                <i class="bi bi-shield-check text-success"></i> Conexão segura e criptografada
-                            </span>
-                        </div>
-                    </form>
-
+            <!-- Campo Senha -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="senha" class="form-label fw-semibold text-secondary mb-0">Senha</label>
+                    <a href="#" class="small text-decoration-none text-primary" style="font-size: 0.8rem;">Esqueceu?</a>
+                </div>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="senha" name="senha"
+                        placeholder="••••••••" required autocomplete="current-password">
+                    <button class="btn btn-outline-secondary border-start-0" type="button" id="toggleSenha"
+                        aria-label="Mostrar ou ocultar senha">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                    </button>
                 </div>
             </div>
-        </div>
+
+            <!-- Lembrar-me -->
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="lembrar" name="lembrar">
+                <label class="form-check-label small text-secondary" for="lembrar">
+                    Lembrar neste navegador
+                </label>
+            </div>
+
+            <!-- Botão de Acesso -->
+            <button type="submit" class="btn btn-primary btn-auth w-100 shadow-sm mb-3">
+                Entrar
+            </button>
+
+            <!-- Link para Cadastro -->
+            <div class="text-center pt-2 border-top">
+                <span class="small text-secondary">Não possui conta? </span>
+                <a href="/cadastro" class="small fw-semibold text-primary text-decoration-none">Cadastre-se</a>
+            </div>
+        </form>
     </div>
 
     <!-- Bootstrap 5.3.3 Bundle JS -->

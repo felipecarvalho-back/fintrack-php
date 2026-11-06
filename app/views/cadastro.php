@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $titulo ?? 'Cadastro - Sistema Financeiro'; ?></title>
+    <title><?php echo $titulo ?? 'Criar Conta - FinTrack'; ?></title>
 
     <!-- Bootstrap 5.3.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -13,120 +13,93 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Estilos Customizados -->
+    <!-- Estilos de Autenticação -->
     <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
-    <div class="container p-3">
-        <div class="row justify-content-center">
-            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
-                <div class="card register-card p-4 p-sm-5 mx-auto">
+    <div class="auth-card auth-card-compact mx-3">
+        <!-- Logo e Cabeçalho -->
+        <div class="text-center mb-3">
+            <div class="d-inline-flex align-items-center gap-2 mb-1">
+                <span class="brand-icon-sm">
+                    <i class="bi bi-wallet2"></i>
+                </span>
+                <span class="fw-bold fs-4 text-dark tracking-tight">Fin<span class="text-primary">Track</span></span>
+            </div>
+            <p class="text-secondary small mb-0">Crie sua conta e organize suas finanças</p>
+        </div>
 
-                    <!-- Cabeçalho / Identidade Visual -->
-                    <div class="text-center mb-4">
-                        <div class="brand-icon mb-3">
-                            <i class="bi bi-person-plus"></i>
-                        </div>
-                        <h4 class="fw-bold text-dark mb-1">Criar Conta</h4>
-                        <p class="text-muted small mb-0">Preencha os dados abaixo para começar</p>
-                    </div>
+        <!-- Formulário de Cadastro -->
+        <form action="/cadastro" method="POST">
+            <!-- Alerta de Erro -->
+            <?php if (!empty($_SESSION['erro'])): ?>
+                <div class="alert alert-danger py-1 px-2 small d-flex align-items-center mb-2" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
+                    <div><?php echo htmlspecialchars($_SESSION['erro']); ?></div>
+                </div>
+                <?php unset($_SESSION['erro']); ?>
+            <?php endif; ?>
 
-                    <!-- Formulário de Cadastro -->
-                    <form action="/cadastro" method="POST">
+            <!-- Nome Completo -->
+            <div class="mb-2">
+                <label for="nome_completo" class="form-label fw-semibold text-secondary">Nome Completo</label>
+                <input type="text" class="form-control" id="nome_completo" name="nome_completo"
+                    placeholder="Seu nome"
+                    value="<?php echo htmlspecialchars($_SESSION['dados_antigos']['nome_completo'] ?? ''); ?>"
+                    required autocomplete="name">
+            </div>
 
-                        <!-- Alerta de Erro -->
-                        <?php if (!empty($_SESSION['erro'])): ?>
-                            <div class="alert alert-danger theme-danger py-2 small d-flex align-items-center mb-3" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-2 fs-6"></i>
-                                <div><?php echo htmlspecialchars($_SESSION['erro']); ?></div>
-                            </div>
-                            <?php unset($_SESSION['erro']); ?>
-                        <?php endif; ?>
+            <!-- E-mail -->
+            <div class="mb-2">
+                <label for="email" class="form-label fw-semibold text-secondary">E-mail</label>
+                <input type="email" class="form-control" id="email" name="email"
+                    placeholder="seu@email.com"
+                    value="<?php echo htmlspecialchars($_SESSION['dados_antigos']['email'] ?? ''); ?>"
+                    required autocomplete="username">
+            </div>
+            <?php unset($_SESSION['dados_antigos']); ?>
 
-                        <!-- Nome Completo -->
-                        <div class="mb-3">
-                            <label for="nome_completo" class="form-label small fw-semibold text-secondary">Nome Completo</label>
-                            <div class="input-group input-group-integrated">
-                                <span class="input-group-text pe-2">
-                                    <i class="bi bi-person"></i>
-                                </span>
-                                <input type="text" class="form-control ps-1" id="nome_completo" name="nome_completo"
-                                    placeholder="Ex: João da Silva"
-                                    value="<?php echo htmlspecialchars($_SESSION['dados_antigos']['nome_completo'] ?? ''); ?>"
-                                    required autocomplete="nome_completo">
-                            </div>
-                        </div>
-
-                        <!-- E-mail -->
-                        <div class="mb-3">
-                            <label for="email" class="form-label small fw-semibold text-secondary">E-mail</label>
-                            <div class="input-group input-group-integrated">
-                                <span class="input-group-text pe-2">
-                                    <i class="bi bi-envelope"></i>
-                                </span>
-                                <input type="email" class="form-control ps-1" id="email" name="email"
-                                    placeholder="seu@email.com"
-                                    value="<?php echo htmlspecialchars($_SESSION['dados_antigos']['email'] ?? ''); ?>"
-                                    required autocomplete="username">
-                            </div>
-                        </div>
-                        <?php unset($_SESSION['dados_antigos']); ?>
-
-                        <!-- Senha -->
-                        <div class="mb-3">
-                            <label for="senha" class="form-label small fw-semibold text-secondary">Senha</label>
-                            <div class="input-group input-group-integrated">
-                                <span class="input-group-text pe-2">
-                                    <i class="bi bi-lock"></i>
-                                </span>
-                                <input type="password" class="form-control ps-1" id="senha" name="senha"
-                                    placeholder="Mínimo de 8 caracteres" required autocomplete="new-password">
-                                <button class="btn text-muted" type="button" id="toggleSenha"
-                                    aria-label="Mostrar ou ocultar senha">
-                                    <i class="bi bi-eye" id="toggleIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Confirmar Senha -->
-                        <div class="mb-3">
-                            <label for="confirmar_senha" class="form-label small fw-semibold text-secondary">Confirmar Senha</label>
-                            <div class="input-group input-group-integrated">
-                                <span class="input-group-text pe-2">
-                                    <i class="bi bi-shield-check"></i>
-                                </span>
-                                <input type="password" class="form-control ps-1" id="confirmar_senha"
-                                    name="confirmar_senha" placeholder="Repita sua senha" required
-                                    autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <!-- Termos e Condições -->
-                        <div class="form-check mb-4">
-                            <input class="form-check-input" type="checkbox" id="termos" name="termos" required>
-                            <label class="form-check-label small text-secondary" for="termos">
-                                Concordo com os <a href="#" class="text-decoration-none text-primary">Termos de Uso</a> e <a href="#" class="text-decoration-none text-primary">Privacidade</a>
-                            </label>
-                        </div>
-
-                        <!-- Botão de Cadastro -->
-                        <button type="submit" class="btn btn-primary btn-register w-100 mb-3 shadow-sm">
-                            Criar Minha Conta
+            <!-- Senha e Confirmar Senha (Lado a Lado para economizar altura) -->
+            <div class="row g-2 mb-2">
+                <div class="col-6">
+                    <label for="senha" class="form-label fw-semibold text-secondary">Senha</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="senha" name="senha"
+                            placeholder="Mín. 8 dígitos" required autocomplete="new-password">
+                        <button class="btn btn-outline-secondary border-start-0 px-2" type="button" id="toggleSenha"
+                            aria-label="Mostrar ou ocultar senha">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
                         </button>
-
-                        <!-- Link para Login -->
-                        <div class="text-center mt-3 pt-3 border-top">
-                            <p class="small text-muted mb-0">
-                                Já possui uma conta?
-                                <a href="/" class="text-decoration-none fw-semibold text-primary">Fazer Login</a>
-                            </p>
-                        </div>
-                    </form>
-
+                    </div>
+                </div>
+                <div class="col-6">
+                    <label for="confirmar_senha" class="form-label fw-semibold text-secondary">Confirmar</label>
+                    <input type="password" class="form-control" id="confirmar_senha"
+                        name="confirmar_senha" placeholder="Repita a senha" required
+                        autocomplete="new-password">
                 </div>
             </div>
-        </div>
+
+            <!-- Termos e Condições -->
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="termos" name="termos" required>
+                <label class="form-check-label small text-secondary" for="termos" style="font-size: 0.78rem;">
+                    Concordo com os <a href="#" class="text-decoration-none text-primary">Termos</a> e <a href="#" class="text-decoration-none text-primary">Privacidade</a>
+                </label>
+            </div>
+
+            <!-- Botão de Cadastro -->
+            <button type="submit" class="btn btn-primary btn-auth w-100 shadow-sm mb-2">
+                Criar Minha Conta
+            </button>
+
+            <!-- Link para Login -->
+            <div class="text-center pt-2 border-top">
+                <span class="small text-secondary">Já possui uma conta? </span>
+                <a href="/" class="small fw-semibold text-primary text-decoration-none">Entrar</a>
+            </div>
+        </form>
     </div>
 
     <!-- Bootstrap 5.3.3 Bundle JS -->

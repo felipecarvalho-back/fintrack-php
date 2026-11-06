@@ -1,117 +1,114 @@
 /* ==========================================================================
-   FinTrack - Estilos de Autenticação (Login, Cadastro, Recuperação de Senha)
+   FinTrack - Estilos de Autenticação (Login, Cadastro)
    ========================================================================== */
 
-/* Layout Base */
+:root {
+    --ft-bg: #f8fafc;
+    --ft-card-bg: #ffffff;
+    --ft-border-color: #e2e8f0;
+    --ft-text-primary: #1e293b;
+    --ft-text-secondary: #64748b;
+    --ft-primary: #0d6efd;
+    --ft-success: #10b981;
+    --ft-danger: #ef4444;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    background: linear-gradient(135deg, #eef2f7 0%, #e5ebf2 100%);
-    min-height: 100vh;
+    background-color: var(--ft-bg);
+    color: var(--ft-text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
-/* Cards de Formulário */
-.login-card,
-.register-card,
-.auth-card {
-    width: 100%;
-    border-radius: 1rem;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    background-color: #ffffff;
+/* Se a tela for muito baixa (ex: celular em modo paisagem < 560px), permite rolagem suave */
+@media (max-height: 560px) {
+    body {
+        overflow-y: auto;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
 }
 
-.login-card {
-    max-width: 420px;
-}
-
-.register-card {
-    max-width: 480px;
-}
-
-/* Ícone de Destaque / Identidade Visual */
-.brand-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+.brand-icon-sm {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
-    font-size: 1.75rem;
+    background-color: rgba(13, 110, 253, 0.12);
+    color: var(--ft-primary);
+    font-size: 1.2rem;
 }
 
-/* Campos de Entrada Integrados (Input Group com visual unificado) */
-.input-group-integrated {
-    border: 1px solid #d0d7de;
+/* Card de Autenticação */
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--ft-card-bg);
+    border: 1px solid var(--ft-border-color);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    padding: 1.75rem 2rem;
+}
+
+.auth-card-compact {
+    max-width: 460px;
+    padding: 1.5rem 2rem;
+}
+
+/* Campos de Formulário Modernos e Limpos */
+.form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.8125rem;
+}
+
+.form-control {
+    border-color: #d0d7de;
     border-radius: 0.5rem;
-    background-color: #ffffff;
+    font-size: 0.9rem;
+    padding: 0.55rem 0.85rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    overflow: hidden;
 }
 
-.input-group-integrated .form-control,
-.input-group-integrated .input-group-text,
-.input-group-integrated .btn {
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-    background-color: transparent !important;
-}
-
-/* Efeito ao focar no campo: borda e anel uniformes no bloco inteiro */
-.input-group-integrated:focus-within {
-    border-color: #0d6efd;
+.form-control:focus {
+    border-color: var(--ft-primary);
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
 }
 
 .input-group-text {
-    color: #6c757d;
+    border-color: #d0d7de;
+    border-radius: 0.5rem;
+    background-color: #f8fafc;
 }
 
-/* Botões de Ação */
-.btn-login,
-.btn-register,
+/* Botões */
 .btn-auth {
-    padding-top: 0.65rem;
-    padding-bottom: 0.65rem;
+    border-radius: 0.5rem;
     font-weight: 600;
-    letter-spacing: 0.2px;
+    padding: 0.6rem 1rem;
+    font-size: 0.925rem;
+    transition: all 0.2s ease;
 }
 
-/* Mensagens de Alerta (Sucesso e Erro) */
+.btn-auth:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+}
+
+/* Alertas */
 .alert {
     border-radius: 0.5rem;
-    font-size: 0.875rem;
-    padding: 0.65rem 0.85rem;
-    border: 1px solid transparent;
-}
-
-.alert-danger,
-.alert.theme-danger {
-    color: #842029 !important;
-    background-color: #f8d7da !important;
-    border-color: #f5c2c7 !important;
-}
-
-.alert-danger i,
-.alert.theme-danger i {
-    color: #dc3545 !important;
-}
-
-.alert-success,
-.alert.theme-success {
-    color: #0f5132 !important;
-    background-color: #d1e7dd !important;
-    border-color: #badbcc !important;
-}
-
-.alert-success i,
-.alert.theme-success i {
-    color: #198754 !important;
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.75rem;
 }

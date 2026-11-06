@@ -189,3 +189,32 @@ body {
 .btn-action:hover {
     transform: translateY(-1px);
 }
+
+.btn-caixinhas-action {
+    background-color: #ffffff;
+    border: 1px solid var(--ft-border-color);
+    color: var(--ft-text-primary);
+}
+
+.btn-caixinhas-action:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+    color: var(--ft-primary);
+}
+
+/* Item de Preview de Caixinha no Home */
+.caixinha-preview-item {
+    background-color: #f8fafc;
+    border: 1px solid var(--ft-border-color);
+    border-radius: 0.75rem;
+    padding: 0.85rem 1rem;
+    display: block;
+    transition: all 0.2s ease;
+}
+
+.caixinha-preview-item:hover {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    transform: translateY(-1px);
+}

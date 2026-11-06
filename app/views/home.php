@@ -112,8 +112,10 @@ $pctDespesas = ($totalReceitas ?? 0) > 0 ? min(100, round((($totalDespesas ?? 0)
                                 <p class="mb-0 fw-semibold text-dark small"><?php echo htmlspecialchars($nomeCompleto); ?></p>
                                 <p class="mb-0 text-muted small" style="font-size: 0.75rem;"><?php echo htmlspecialchars($emailUsuario); ?></p>
                             </li>
+                            <li><a class="dropdown-item py-2 small" href="/orcamento"><i class="bi bi-calendar2-range me-2 text-secondary"></i> Orçamento Mensal</a></li>
                             <li><a class="dropdown-item py-2 small" href="/variaveis"><i class="bi bi-sliders me-2 text-secondary"></i> Minhas Variáveis</a></li>
-                            <li><a class="dropdown-item py-2 small" href="/orcamento"><i class="bi bi-calendar2-range me-2 text-secondary"></i> Orçamento</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/caixinhas"><i class="bi bi-piggy-bank me-2 text-secondary"></i> Caixinhas</a></li>
+                            <li><a class="dropdown-item py-2 small" href="/investimentos"><i class="bi bi-graph-up-arrow me-2 text-secondary"></i> Investimentos</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item py-2 small text-danger" href="/logout">
@@ -141,7 +143,7 @@ $pctDespesas = ($totalReceitas ?? 0) > 0 ? min(100, round((($totalDespesas ?? 0)
                 <a href="/orcamento" class="btn btn-primary btn-action text-white shadow-sm">
                     <i class="bi bi-calendar2-range me-1"></i> Abrir Orçamento do Mês
                 </a>
-                <a href="/caixinhas" class="btn btn-outline-secondary btn-action bg-white border">
+                <a href="/caixinhas" class="btn btn-action btn-caixinhas-action shadow-sm">
                     <i class="bi bi-piggy-bank me-1"></i> Caixinhas
                 </a>
             </div>
@@ -317,7 +319,7 @@ $pctDespesas = ($totalReceitas ?? 0) > 0 ? min(100, round((($totalDespesas ?? 0)
                             <?php foreach (array_slice($caixinhas, 0, 4) as $item): 
                                 $prog = $item['target_amount'] > 0 ? min(100, round(($item['current_amount'] / $item['target_amount']) * 100)) : 0;
                             ?>
-                                <div class="p-3 border rounded-3 bg-light">
+                                <a href="/caixinhas" class="caixinha-preview-item text-decoration-none">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="bi <?php echo htmlspecialchars($item['icon'] ?? 'bi-piggy-bank'); ?> fs-5" style="color: <?php echo htmlspecialchars($item['color'] ?? '#0d6efd'); ?>;"></i>
@@ -332,7 +334,7 @@ $pctDespesas = ($totalReceitas ?? 0) > 0 ? min(100, round((($totalDespesas ?? 0)
                                         <span>Meta: R$ <?php echo number_format($item['target_amount'], 2, ',', '.'); ?></span>
                                         <span class="fw-semibold"><?php echo $prog; ?>%</span>
                                     </div>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
