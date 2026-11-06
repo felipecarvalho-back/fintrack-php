@@ -1,4 +1,9 @@
 /vendor
 .env
 
+# Scripts locais de automação desktop (Windows)
+*.bat
+*.vbs
+fintrack.ico
+
 ROADMAP.md
