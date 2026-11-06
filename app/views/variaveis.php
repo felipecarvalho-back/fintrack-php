@@ -149,7 +149,7 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                 <tr>
                                     <th class="ps-3">Nome do Campo</th>
                                     <th class="text-end">Valor Padrão</th>
-                                    <th class="text-center">Tipo</th>
+                                    <th class="text-center">Frequência</th>
                                     <th class="text-center pe-3">Ações</th>
                                 </tr>
                             </thead>
@@ -172,9 +172,9 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                         </td>
                                         <td class="text-center">
                                             <?php if ($item['isFixo']): ?>
-                                                <span class="badge bg-primary-subtle text-primary">Fixo</span>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary-subtle text-secondary">Variável</span>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-calendar-event me-1"></i> Apenas do mês</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center pe-3">
@@ -210,7 +210,7 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                 <tr>
                                     <th class="ps-3">Nome do Campo</th>
                                     <th class="text-end">Valor Padrão</th>
-                                    <th class="text-center">Tipo</th>
+                                    <th class="text-center">Frequência</th>
                                     <th class="text-center pe-3">Ações</th>
                                 </tr>
                             </thead>
@@ -233,9 +233,9 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                                         </td>
                                         <td class="text-center">
                                             <?php if ($item['isFixo']): ?>
-                                                <span class="badge bg-primary-subtle text-primary">Fixo</span>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary-subtle text-secondary">Variável</span>
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="bi bi-calendar-event me-1"></i> Apenas do mês</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-center pe-3">
@@ -339,10 +339,26 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                             </small>
                         </div>
 
-                        <div class="form-check form-switch mb-2">
-                            <input class="form-check-input" type="checkbox" role="switch" id="isFixo" name="is_fixo" value="1" 
-                                <?php echo (!isset($dadosModal['is_fixo']) || !empty($dadosModal['is_fixo'])) ? 'checked' : ''; ?>>
-                            <label class="form-check-label small" for="isFixo">Repetir todo mês no orçamento</label>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Frequência da Variável</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="is_fixo" id="varAplicaTodosMeses" value="1" 
+                                        <?php echo (!isset($dadosModal['is_fixo']) || !empty($dadosModal['is_fixo'])) ? 'checked' : ''; ?>>
+                                    <label class="btn btn-outline-primary w-100 text-start p-2 h-100" for="varAplicaTodosMeses">
+                                        <span class="fw-bold d-block small"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
+                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Conta que tenho todo mês</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="is_fixo" id="varAplicaApenasMes" value="0"
+                                        <?php echo (isset($dadosModal['is_fixo']) && empty($dadosModal['is_fixo'])) ? 'checked' : ''; ?>>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2 h-100" for="varAplicaApenasMes">
+                                        <span class="fw-bold d-block small"><i class="bi bi-calendar-event me-1"></i> Apenas do mês</span>
+                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Gasto ou ganho pontual</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-top">

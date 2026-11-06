@@ -46,6 +46,95 @@ if ($proximoMes > 12) {
     $proximoMes = 1;
     $proximoAno++;
 }
+
+// Separar em variáveis que se repetem em todos os meses vs variáveis exclusivas deste mês
+$receitasTodosMeses = array_filter($variaveisReceitas, fn($i) => !empty($i['is_fixo']));
+$receitasDoMes = array_filter($variaveisReceitas, fn($i) => empty($i['is_fixo']));
+
+$despesasTodosMeses = array_filter($variaveisDespesas, fn($i) => !empty($i['is_fixo']));
+$despesasDoMes = array_filter($variaveisDespesas, fn($i) => empty($i['is_fixo']));
+
+function renderLinhaVariavel(array $item, string $tipoClasse): void {
+    $isMult = ($item['tipo_calculo'] ?? 'simples') === 'multiplicador';
+    $isPontual = empty($item['is_fixo']);
+    ?>
+    <div class="p-3 bg-light rounded-3 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+        <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></span>
+                <?php if ($isMult): ?>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle small py-1" style="font-size: 0.7rem;">
+                        <i class="bi bi-calculator me-1"></i> Multiplicador
+                    </span>
+                <?php endif; ?>
+                <?php if ($isPontual): ?>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small py-1" style="font-size: 0.7rem;">
+                        <i class="bi bi-calendar-event me-1"></i> Apenas deste mês
+                    </span>
+                <?php endif; ?>
+            </div>
+            <span class="text-secondary small">
+                <?php if ($isMult): ?>
+                    Cálculo: <?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?> &times; R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>/unid.
+                <?php else: ?>
+                    Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>
+                <?php endif; ?>
+            </span>
+        </div>
+
+        <?php if ($isMult): ?>
+            <div class="d-flex flex-wrap align-items-center gap-1 justify-content-sm-end">
+                <div class="input-group input-group-sm" style="width: 105px;">
+                    <span class="input-group-text bg-white text-secondary px-2" title="<?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?>">
+                        <?php echo htmlspecialchars(mb_substr($item['label_multiplicador'] ?? 'Dias', 0, 5)); ?>
+                    </span>
+                    <input type="number" step="any" min="0" 
+                        name="valores[<?php echo $item['id']; ?>][quantidade]"
+                        id="qtd_<?php echo $item['id']; ?>"
+                        data-id="<?php echo $item['id']; ?>"
+                        value="<?php echo (float) ($item['quantidade'] ?? 1); ?>"
+                        class="form-control text-end fw-semibold input-multiplicador-qtd"
+                        placeholder="0">
+                </div>
+
+                <span class="text-secondary fw-bold small">&times;</span>
+
+                <div class="input-group input-group-sm" style="width: 115px;">
+                    <span class="input-group-text bg-white text-secondary px-2">R$</span>
+                    <input type="number" step="0.01" min="0" 
+                        name="valores[<?php echo $item['id']; ?>][valor_unitario]"
+                        id="unit_<?php echo $item['id']; ?>"
+                        data-id="<?php echo $item['id']; ?>"
+                        value="<?php echo number_format($item['valor_unitario'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
+                        class="form-control text-end fw-semibold input-multiplicador-unit"
+                        placeholder="0.00">
+                </div>
+
+                <span class="text-secondary fw-bold small">=</span>
+
+                <div class="input-group input-group-sm" style="width: 130px;">
+                    <span class="input-group-text bg-light text-secondary px-2">R$</span>
+                    <input type="number" step="0.01" min="0" readonly
+                        name="valores[<?php echo $item['id']; ?>][valor]"
+                        id="total_var_<?php echo $item['id']; ?>"
+                        value="<?php echo number_format($item['valor'] ?? 0, 2, '.', ''); ?>"
+                        class="form-control text-end fw-bold bg-light input-valor <?php echo $tipoClasse; ?>"
+                        placeholder="0.00">
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="input-group" style="max-width: 200px;">
+                <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
+                <input type="number" step="0.01" min="0" 
+                    name="valores[<?php echo $item['id']; ?>]"
+                    value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
+                    class="form-control text-end fw-bold input-valor <?php echo $tipoClasse; ?>"
+                    placeholder="0.00">
+            </div>
+        <?php endif; ?>
+    </div>
+    <?php
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR" data-bs-theme="light">
@@ -249,82 +338,34 @@ if ($proximoMes > 12) {
                         </div>
                         <div class="card-body p-3 p-md-4">
                             <div class="d-flex flex-column gap-3" id="listaReceitas">
-                                <?php foreach ($variaveisReceitas as $item): ?>
-                                    <?php $isMult = ($item['tipo_calculo'] ?? 'simples') === 'multiplicador'; ?>
-                                    <div class="p-3 bg-light rounded-3 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-                                        <div>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></span>
-                                                <?php if ($isMult): ?>
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle small py-1" style="font-size: 0.72rem;">
-                                                        <i class="bi bi-calculator me-1"></i> Multiplicador
-                                                    </span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <span class="text-secondary small">
-                                                <?php if ($isMult): ?>
-                                                    Cálculo: <?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?> &times; R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>/unid.
-                                                <?php else: ?>
-                                                    Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>
-                                                <?php endif; ?>
-                                            </span>
-                                        </div>
-
-                                        <?php if ($isMult): ?>
-                                            <div class="d-flex flex-wrap align-items-center gap-1 justify-content-sm-end">
-                                                <!-- Quantidade -->
-                                                <div class="input-group input-group-sm" style="width: 105px;">
-                                                    <span class="input-group-text bg-white text-secondary px-2" title="<?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?>">
-                                                        <?php echo htmlspecialchars(mb_substr($item['label_multiplicador'] ?? 'Dias', 0, 5)); ?>
-                                                    </span>
-                                                    <input type="number" step="any" min="0" 
-                                                        name="valores[<?php echo $item['id']; ?>][quantidade]"
-                                                        id="qtd_<?php echo $item['id']; ?>"
-                                                        data-id="<?php echo $item['id']; ?>"
-                                                        value="<?php echo (float) ($item['quantidade'] ?? 1); ?>"
-                                                        class="form-control text-end fw-semibold input-multiplicador-qtd"
-                                                        placeholder="0">
-                                                </div>
-
-                                                <span class="text-secondary fw-bold small">&times;</span>
-
-                                                <!-- Valor Unitário -->
-                                                <div class="input-group input-group-sm" style="width: 115px;">
-                                                    <span class="input-group-text bg-white text-secondary px-2">R$</span>
-                                                    <input type="number" step="0.01" min="0" 
-                                                        name="valores[<?php echo $item['id']; ?>][valor_unitario]"
-                                                        id="unit_<?php echo $item['id']; ?>"
-                                                        data-id="<?php echo $item['id']; ?>"
-                                                        value="<?php echo number_format($item['valor_unitario'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
-                                                        class="form-control text-end fw-semibold input-multiplicador-unit"
-                                                        placeholder="0.00">
-                                                </div>
-
-                                                <span class="text-secondary fw-bold small">=</span>
-
-                                                <!-- Total Calculado -->
-                                                <div class="input-group input-group-sm" style="width: 130px;">
-                                                    <span class="input-group-text bg-light text-secondary px-2">R$</span>
-                                                    <input type="number" step="0.01" min="0" readonly
-                                                        name="valores[<?php echo $item['id']; ?>][valor]"
-                                                        id="total_var_<?php echo $item['id']; ?>"
-                                                        value="<?php echo number_format($item['valor'] ?? 0, 2, '.', ''); ?>"
-                                                        class="form-control text-end fw-bold bg-light input-valor input-receita"
-                                                        placeholder="0.00">
-                                                </div>
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="input-group" style="max-width: 200px;">
-                                                <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
-                                                <input type="number" step="0.01" min="0" 
-                                                    name="valores[<?php echo $item['id']; ?>]"
-                                                    value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
-                                                    class="form-control text-end fw-bold input-valor input-receita"
-                                                    placeholder="0.00">
-                                            </div>
-                                        <?php endif; ?>
+                                <!-- Seção: Variáveis em Todos os Meses -->
+                                <div class="d-flex flex-column gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-1 text-secondary small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                        <i class="bi bi-arrow-repeat text-success"></i> Em todos os meses
                                     </div>
-                                <?php endforeach; ?>
+                                    <?php if (empty($receitasTodosMeses)): ?>
+                                        <p class="text-muted small mb-0 fst-italic" style="font-size: 0.8rem;">Nenhuma receita fixa cadastrada.</p>
+                                    <?php else: ?>
+                                        <?php foreach ($receitasTodosMeses as $item): ?>
+                                            <?php renderLinhaVariavel($item, 'input-receita'); ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Seção: Variáveis Apenas Deste Mês -->
+                                <?php if (!empty($receitasDoMes)): ?>
+                                    <div class="d-flex flex-column gap-2 pt-3 border-top">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-1 text-secondary small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                                <i class="bi bi-calendar-event text-warning"></i> Apenas deste mês (<?php echo $nomeMesAtual; ?>)
+                                            </div>
+                                            <span class="badge bg-light text-secondary border"><?php echo count($receitasDoMes); ?></span>
+                                        </div>
+                                        <?php foreach ($receitasDoMes as $item): ?>
+                                            <?php renderLinhaVariavel($item, 'input-receita'); ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -347,82 +388,36 @@ if ($proximoMes > 12) {
                         </div>
                         <div class="card-body p-3 p-md-4">
                             <div class="d-flex flex-column gap-3" id="listaDespesas">
-                                <?php foreach ($variaveisDespesas as $item): ?>
-                                    <?php $isMult = ($item['tipo_calculo'] ?? 'simples') === 'multiplicador'; ?>
-                                    <div class="p-3 bg-light rounded-3 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-                                        <div>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></span>
-                                                <?php if ($isMult): ?>
-                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle small py-1" style="font-size: 0.72rem;">
-                                                        <i class="bi bi-calculator me-1"></i> Multiplicador
-                                                    </span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <span class="text-secondary small">
-                                                <?php if ($isMult): ?>
-                                                    Cálculo: <?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?> &times; R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>/unid.
-                                                <?php else: ?>
-                                                    Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>
-                                                <?php endif; ?>
-                                            </span>
-                                        </div>
-
-                                        <?php if ($isMult): ?>
-                                            <div class="d-flex flex-wrap align-items-center gap-1 justify-content-sm-end">
-                                                <!-- Quantidade -->
-                                                <div class="input-group input-group-sm" style="width: 105px;">
-                                                    <span class="input-group-text bg-white text-secondary px-2" title="<?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?>">
-                                                        <?php echo htmlspecialchars(mb_substr($item['label_multiplicador'] ?? 'Dias', 0, 5)); ?>
-                                                    </span>
-                                                    <input type="number" step="any" min="0" 
-                                                        name="valores[<?php echo $item['id']; ?>][quantidade]"
-                                                        id="qtd_<?php echo $item['id']; ?>"
-                                                        data-id="<?php echo $item['id']; ?>"
-                                                        value="<?php echo (float) ($item['quantidade'] ?? 1); ?>"
-                                                        class="form-control text-end fw-semibold input-multiplicador-qtd"
-                                                        placeholder="0">
-                                                </div>
-
-                                                <span class="text-secondary fw-bold small">&times;</span>
-
-                                                <!-- Valor Unitário -->
-                                                <div class="input-group input-group-sm" style="width: 115px;">
-                                                    <span class="input-group-text bg-white text-secondary px-2">R$</span>
-                                                    <input type="number" step="0.01" min="0" 
-                                                        name="valores[<?php echo $item['id']; ?>][valor_unitario]"
-                                                        id="unit_<?php echo $item['id']; ?>"
-                                                        data-id="<?php echo $item['id']; ?>"
-                                                        value="<?php echo number_format($item['valor_unitario'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
-                                                        class="form-control text-end fw-semibold input-multiplicador-unit"
-                                                        placeholder="0.00">
-                                                </div>
-
-                                                <span class="text-secondary fw-bold small">=</span>
-
-                                                <!-- Total Calculado -->
-                                                <div class="input-group input-group-sm" style="width: 130px;">
-                                                    <span class="input-group-text bg-light text-secondary px-2">R$</span>
-                                                    <input type="number" step="0.01" min="0" readonly
-                                                        name="valores[<?php echo $item['id']; ?>][valor]"
-                                                        id="total_var_<?php echo $item['id']; ?>"
-                                                        value="<?php echo number_format($item['valor'] ?? 0, 2, '.', ''); ?>"
-                                                        class="form-control text-end fw-bold bg-light input-valor input-despesa"
-                                                        placeholder="0.00">
-                                                </div>
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="input-group" style="max-width: 200px;">
-                                                <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
-                                                <input type="number" step="0.01" min="0" 
-                                                    name="valores[<?php echo $item['id']; ?>]"
-                                                    value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
-                                                    class="form-control text-end fw-bold input-valor input-despesa"
-                                                    placeholder="0.00">
-                                            </div>
-                                        <?php endif; ?>
+                                <!-- Seção: Variáveis em Todos os Meses -->
+                                <div class="d-flex flex-column gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-1 text-secondary small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                        <i class="bi bi-arrow-repeat text-danger"></i> Em todos os meses
                                     </div>
-                                <?php endforeach; ?>
+                                    <?php if (empty($despesasTodosMeses)): ?>
+                                        <p class="text-muted small mb-0 fst-italic" style="font-size: 0.8rem;">Nenhuma despesa fixa cadastrada.</p>
+                                    <?php else: ?>
+                                        <?php foreach ($despesasTodosMeses as $item): ?>
+                                            <?php renderLinhaVariavel($item, 'input-despesa'); ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Seção: Variáveis Apenas Deste Mês -->
+                                <div class="d-flex flex-column gap-2 pt-3 border-top">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-1 text-secondary small fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                                            <i class="bi bi-calendar-event text-warning"></i> Apenas deste mês (<?php echo $nomeMesAtual; ?>)
+                                        </div>
+                                        <span class="badge bg-light text-secondary border"><?php echo count($despesasDoMes); ?></span>
+                                    </div>
+                                    <?php if (empty($despesasDoMes)): ?>
+                                        <p class="text-secondary small mb-0 fst-italic" style="font-size: 0.82rem;">Nenhum gasto pontual neste mês.</p>
+                                    <?php else: ?>
+                                        <?php foreach ($despesasDoMes as $item): ?>
+                                            <?php renderLinhaVariavel($item, 'input-despesa'); ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -517,9 +512,24 @@ if ($proximoMes > 12) {
                             <small class="text-secondary" id="modalDicaValorPadrao">Este valor será sugerido automaticamente em novos meses.</small>
                         </div>
 
-                        <div class="form-check form-switch mb-2">
-                            <input class="form-check-input" type="checkbox" role="switch" id="isFixo" name="is_fixo" value="1" checked>
-                            <label class="form-check-label small" for="isFixo">Repetir todo mês no orçamento</label>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Onde esta variável deve aparecer?</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="is_fixo" id="aplicaTodosMeses" value="1" checked>
+                                    <label class="btn btn-outline-primary w-100 text-start p-2 h-100" for="aplicaTodosMeses">
+                                        <span class="fw-bold d-block small"><i class="bi bi-arrow-repeat me-1"></i> Todos os meses</span>
+                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Conta que tenho todo mês</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="is_fixo" id="aplicaApenasMes" value="0">
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2 h-100" for="aplicaApenasMes">
+                                        <span class="fw-bold d-block small"><i class="bi bi-calendar-event me-1"></i> Apenas deste mês</span>
+                                        <span class="text-muted d-block" style="font-size: 0.72rem;">Gasto ou ganho pontual</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-top">
