@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\FinancaMensal;
 use App\Entity\ValorMensal;
+use App\Enum\TipoCalculo;
 use App\Enum\TipoVariavel;
 use PDO;
 
@@ -44,7 +45,6 @@ class FinancaMensalRepository
             );
         }
 
-        // Se não existir, faz o INSERT inicial
         $insertSql = "INSERT INTO financas_mensais (conta_id, mes, ano) 
                       VALUES (:conta_id, :mes, :ano)";
 
@@ -73,8 +73,9 @@ class FinancaMensalRepository
      */
     public function buscarValoresDoMes(int $financaMensalId): array
     {
-        $sql = "SELECT vm.id, vm.financa_mensal_id, vm.variavel_id, vm.valor,
-                       vo.nome AS variavel_nome, vo.tipo AS variavel_tipo
+        $sql = "SELECT vm.id, vm.financa_mensal_id, vm.variavel_id, vm.valor, vm.quantidade, vm.valor_unitario,
+                       vo.nome AS variavel_nome, vo.tipo AS variavel_tipo,
+                       vo.tipo_calculo AS variavel_tipo_calculo, vo.label_multiplicador
                 FROM valores_mensais vm
                 INNER JOIN variaveis_orcamento vo ON vo.id = vm.variavel_id
                 WHERE vm.financa_mensal_id = :financa_mensal_id
@@ -86,13 +87,20 @@ class FinancaMensalRepository
 
         $valores = [];
         foreach ($rows as $row) {
+            $tipoCalcRaw = (string) ($row['variavel_tipo_calculo'] ?? 'simples');
+            $tipoCalculo = TipoCalculo::tryFrom($tipoCalcRaw) ?? TipoCalculo::Simples;
+
             $valores[] = new ValorMensal(
                 id: (int) $row['id'],
                 financaMensalId: (int) $row['financa_mensal_id'],
                 variavelId: (int) $row['variavel_id'],
                 valor: (float) $row['valor'],
+                quantidade: isset($row['quantidade']) ? (float) $row['quantidade'] : null,
+                valorUnitario: isset($row['valor_unitario']) ? (float) $row['valor_unitario'] : null,
                 variavelNome: (string) $row['variavel_nome'],
-                variavelTipo: TipoVariavel::from((string) $row['variavel_tipo'])
+                variavelTipo: TipoVariavel::from((string) $row['variavel_tipo']),
+                tipoCalculo: $tipoCalculo,
+                labelMultiplicador: (string) ($row['label_multiplicador'] ?? 'Dias')
             );
         }
 
@@ -100,43 +108,41 @@ class FinancaMensalRepository
     }
 
     /**
-     * Salva ou atualiza o valor de uma variável específica no mês (INSERT ... ON DUPLICATE KEY UPDATE).
-     */
-    public function salvarValorVariavel(int $financaMensalId, int $variavelId, float $valor): void
-    {
-        $sql = "INSERT INTO valores_mensais (financa_mensal_id, variavel_id, valor)
-                VALUES (:financa_mensal_id, :variavel_id, :valor)
-                ON DUPLICATE KEY UPDATE valor = VALUES(valor)";
-
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':financa_mensal_id' => $financaMensalId,
-            ':variavel_id'       => $variavelId,
-            ':valor'             => $valor,
-        ]);
-    }
-
-    /**
-     * Salva um lote de valores em uma transação segura.
+     * Salva ou atualiza um lote de valores no mês com suporte a multiplicador (quantidade e unitário).
      *
-     * @param array<int, float> $valoresPorVariavel [variavel_id => valor]
+     * @param array<int, array|float> $itensPorVariavel [variavel_id => ['quantidade' => 20, 'unitario' => 25, 'valor' => 500] ou float]
      */
-    public function salvarLoteValores(int $financaMensalId, array $valoresPorVariavel): void
+    public function salvarLoteValores(int $financaMensalId, array $itensPorVariavel): void
     {
         $this->pdo->beginTransaction();
 
         try {
-            $sql = "INSERT INTO valores_mensais (financa_mensal_id, variavel_id, valor)
-                    VALUES (:financa_mensal_id, :variavel_id, :valor)
-                    ON DUPLICATE KEY UPDATE valor = VALUES(valor)";
+            $sql = "INSERT INTO valores_mensais (financa_mensal_id, variavel_id, quantidade, valor_unitario, valor)
+                    VALUES (:financa_mensal_id, :variavel_id, :quantidade, :valor_unitario, :valor)
+                    ON DUPLICATE KEY UPDATE 
+                        quantidade = VALUES(quantidade),
+                        valor_unitario = VALUES(valor_unitario),
+                        valor = VALUES(valor)";
 
             $stmt = $this->pdo->prepare($sql);
 
-            foreach ($valoresPorVariavel as $variavelId => $valor) {
+            foreach ($itensPorVariavel as $variavelId => $dados) {
+                if (is_array($dados)) {
+                    $qtd = isset($dados['quantidade']) ? (float) $dados['quantidade'] : 1.0;
+                    $unit = isset($dados['valor_unitario']) ? (float) $dados['valor_unitario'] : (float) ($dados['valor'] ?? 0.0);
+                    $valorFinal = (float) ($dados['valor'] ?? ($qtd * $unit));
+                } else {
+                    $qtd = 1.0;
+                    $unit = (float) $dados;
+                    $valorFinal = (float) $dados;
+                }
+
                 $stmt->execute([
                     ':financa_mensal_id' => $financaMensalId,
                     ':variavel_id'       => (int) $variavelId,
-                    ':valor'             => (float) $valor,
+                    ':quantidade'        => $qtd,
+                    ':valor_unitario'    => $unit,
+                    ':valor'             => $valorFinal,
                 ]);
             }
 

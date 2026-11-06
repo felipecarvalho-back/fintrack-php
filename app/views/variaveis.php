@@ -172,8 +172,20 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                             <tbody>
                                 <?php foreach ($receitas as $item): ?>
                                     <tr>
-                                        <td class="ps-3 fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></td>
-                                        <td class="text-end text-success fw-medium">R$ <?php echo number_format($item['valorPadrao'], 2, ',', '.'); ?></td>
+                                        <td class="ps-3">
+                                            <div class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></div>
+                                            <?php if (($item['tipoCalculo'] ?? 'simples') === 'multiplicador'): ?>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-calculator me-1"></i> Multiplicador (<?php echo htmlspecialchars($item['labelMultiplicador'] ?? 'Dias'); ?> &times; R$)
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end text-success fw-medium">
+                                            R$ <?php echo number_format($item['valorPadrao'], 2, ',', '.'); ?>
+                                            <?php if (($item['tipoCalculo'] ?? 'simples') === 'multiplicador'): ?>
+                                                <span class="text-muted small d-block" style="font-size: 0.72rem;">/unid.</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-center">
                                             <?php if ($item['isFixo']): ?>
                                                 <span class="badge bg-primary-subtle text-primary">Fixo</span>
@@ -221,8 +233,20 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                             <tbody>
                                 <?php foreach ($despesas as $item): ?>
                                     <tr>
-                                        <td class="ps-3 fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></td>
-                                        <td class="text-end text-danger fw-medium">R$ <?php echo number_format($item['valorPadrao'], 2, ',', '.'); ?></td>
+                                        <td class="ps-3">
+                                            <div class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></div>
+                                            <?php if (($item['tipoCalculo'] ?? 'simples') === 'multiplicador'): ?>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.7rem;">
+                                                    <i class="bi bi-calculator me-1"></i> Multiplicador (<?php echo htmlspecialchars($item['labelMultiplicador'] ?? 'Dias'); ?> &times; R$)
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-end text-danger fw-medium">
+                                            R$ <?php echo number_format($item['valorPadrao'], 2, ',', '.'); ?>
+                                            <?php if (($item['tipoCalculo'] ?? 'simples') === 'multiplicador'): ?>
+                                                <span class="text-muted small d-block" style="font-size: 0.72rem;">/unid.</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-center">
                                             <?php if ($item['isFixo']): ?>
                                                 <span class="badge bg-primary-subtle text-primary">Fixo</span>
@@ -286,20 +310,55 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                             <label for="nome" class="form-label small fw-semibold text-secondary">Nome do Campo</label>
                             <input type="text" class="form-control" id="nome" name="nome" 
                                 value="<?php echo htmlspecialchars($dadosModal['nome'] ?? ''); ?>"
-                                placeholder="Ex: Netflix, Gemini, Academia, Renda Extra..." required>
+                                placeholder="Ex: Ajuda Mãe, Netflix, Freelance, Academia..." required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="valor_padrao" class="form-label small fw-semibold text-secondary">Valor Padrão Sugerido (R$)</label>
+                            <label class="form-label small fw-semibold text-secondary">Modo de Cálculo</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_calculo" id="tipoCalcSimples" value="simples" 
+                                        <?php echo (($dadosModal['tipo_calculo'] ?? 'simples') === 'simples') ? 'checked' : ''; ?>>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2" for="tipoCalcSimples">
+                                        <span class="fw-bold d-block small"><i class="bi bi-cash me-1"></i> Valor Fixo</span>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Valor único (R$)</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_calculo" id="tipoCalcMultiplicador" value="multiplicador"
+                                        <?php echo (($dadosModal['tipo_calculo'] ?? '') === 'multiplicador') ? 'checked' : ''; ?>>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2" for="tipoCalcMultiplicador">
+                                        <span class="fw-bold d-block small"><i class="bi bi-calculator me-1"></i> Multiplicador</span>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Qtd &times; Valor</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 <?php echo (($dadosModal['tipo_calculo'] ?? '') === 'multiplicador') ? '' : 'd-none'; ?>" id="containerMultiplicador">
+                            <label for="label_multiplicador" class="form-label small fw-semibold text-secondary">Rótulo da Quantidade</label>
+                            <input type="text" class="form-control" id="label_multiplicador" name="label_multiplicador" 
+                                value="<?php echo htmlspecialchars($dadosModal['label_multiplicador'] ?? 'Dias'); ?>"
+                                placeholder="Ex: Dias, Horas, Diárias">
+                            <small class="text-secondary">Nome do multiplicador (ex: dias trabalhados para calcular o repasse à mãe).</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valor_padrao" class="form-label small fw-semibold text-secondary" id="labelValorPadrao">
+                                <?php echo (($dadosModal['tipo_calculo'] ?? '') === 'multiplicador') ? 'Valor Unitário Padrão (R$)' : 'Valor Padrão Sugerido (R$)'; ?>
+                            </label>
                             <input type="number" step="0.01" min="0" class="form-control" id="valor_padrao" name="valor_padrao" 
                                 value="<?php echo htmlspecialchars((string) ($dadosModal['valor_padrao'] ?? '0.00')); ?>"
                                 placeholder="0.00">
+                            <small class="text-secondary" id="dicaValorPadrao">
+                                <?php echo (($dadosModal['tipo_calculo'] ?? '') === 'multiplicador') ? 'Ex: Valor pago por dia ou unidade trabalhada.' : 'Este valor será sugerido automaticamente em novos meses.'; ?>
+                            </small>
                         </div>
 
                         <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" role="switch" id="isFixo" name="is_fixo" value="1" 
                                 <?php echo (!isset($dadosModal['is_fixo']) || !empty($dadosModal['is_fixo'])) ? 'checked' : ''; ?>>
-                            <label class="form-check-label small" for="isFixo">Repetir todo mês como valor fixo</label>
+                            <label class="form-check-label small" for="isFixo">Repetir todo mês no orçamento</label>
                         </div>
                     </div>
                     <div class="modal-footer border-top">
@@ -315,6 +374,32 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+
+    <!-- Script de alternância do modo de cálculo -->
+    <script>
+        const tipoCalcSimples = document.getElementById('tipoCalcSimples');
+        const tipoCalcMultiplicador = document.getElementById('tipoCalcMultiplicador');
+        const containerMultiplicador = document.getElementById('containerMultiplicador');
+        const labelValorPadrao = document.getElementById('labelValorPadrao');
+        const dicaValorPadrao = document.getElementById('dicaValorPadrao');
+
+        function atualizarModoModalVariavel() {
+            if (tipoCalcMultiplicador && tipoCalcMultiplicador.checked) {
+                containerMultiplicador.classList.remove('d-none');
+                labelValorPadrao.innerText = 'Valor Unitário Padrão (R$)';
+                dicaValorPadrao.innerText = 'Ex: Valor pago por dia ou unidade trabalhada.';
+            } else if (containerMultiplicador) {
+                containerMultiplicador.classList.add('d-none');
+                labelValorPadrao.innerText = 'Valor Padrão Sugerido (R$)';
+                dicaValorPadrao.innerText = 'Este valor será sugerido automaticamente em novos meses.';
+            }
+        }
+
+        if (tipoCalcSimples && tipoCalcMultiplicador) {
+            tipoCalcSimples.addEventListener('change', atualizarModoModalVariavel);
+            tipoCalcMultiplicador.addEventListener('change', atualizarModoModalVariavel);
+        }
+    </script>
 
     <!-- Script para reabrir o modal automaticamente se houver erro -->
     <?php if (!empty($_SESSION['erro_modal_variavel'])): ?>

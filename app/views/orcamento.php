@@ -201,7 +201,7 @@ if ($proximoMes > 12) {
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Total Receitas</span>
-                            <h3 class="fw-bold text-success mb-0 mt-1" id="cardTotalReceitas">R$ 0,00</h3>
+                            <h3 class="fw-bold text-success mb-0 mt-1" id="cardTotalReceitas">R$ <?php echo number_format($totais['receitas'] ?? 0, 2, ',', '.'); ?></h3>
                         </div>
                         <div class="stat-icon stat-icon-success">
                             <i class="bi bi-arrow-down-left"></i>
@@ -215,7 +215,7 @@ if ($proximoMes > 12) {
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Total Despesas</span>
-                            <h3 class="fw-bold text-danger mb-0 mt-1" id="cardTotalDespesas">R$ 0,00</h3>
+                            <h3 class="fw-bold text-danger mb-0 mt-1" id="cardTotalDespesas">R$ <?php echo number_format($totais['despesas'] ?? 0, 2, ',', '.'); ?></h3>
                         </div>
                         <div class="stat-icon stat-icon-danger">
                             <i class="bi bi-arrow-up-right"></i>
@@ -229,7 +229,10 @@ if ($proximoMes > 12) {
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <span class="text-secondary small fw-medium text-uppercase tracking-wider">Saldo Previsto</span>
-                            <h3 class="fw-bold text-primary mb-0 mt-1" id="cardSaldo">R$ 0,00</h3>
+                            <?php $saldoInicial = (float) ($totais['saldo'] ?? 0); ?>
+                            <h3 class="fw-bold <?php echo $saldoInicial >= 0 ? 'text-primary' : 'text-danger'; ?> mb-0 mt-1" id="cardSaldo">
+                                R$ <?php echo number_format($saldoInicial, 2, ',', '.'); ?>
+                            </h3>
                         </div>
                         <div class="stat-icon stat-icon-primary">
                             <i class="bi bi-calculator"></i>
@@ -263,19 +266,79 @@ if ($proximoMes > 12) {
                         <div class="card-body p-3 p-md-4">
                             <div class="d-flex flex-column gap-3" id="listaReceitas">
                                 <?php foreach ($variaveisReceitas as $item): ?>
+                                    <?php $isMult = ($item['tipo_calculo'] ?? 'simples') === 'multiplicador'; ?>
                                     <div class="p-3 bg-light rounded-3 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
                                         <div>
-                                            <span class="fw-semibold text-dark d-block"><?php echo htmlspecialchars($item['nome']); ?></span>
-                                            <span class="text-secondary small">Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?></span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></span>
+                                                <?php if ($isMult): ?>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle small py-1" style="font-size: 0.72rem;">
+                                                        <i class="bi bi-calculator me-1"></i> Multiplicador
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <span class="text-secondary small">
+                                                <?php if ($isMult): ?>
+                                                    Cálculo: <?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?> &times; R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>/unid.
+                                                <?php else: ?>
+                                                    Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>
+                                                <?php endif; ?>
+                                            </span>
                                         </div>
-                                        <div class="input-group" style="max-width: 200px;">
-                                            <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
-                                            <input type="number" step="0.01" min="0" 
-                                                name="valores[<?php echo $item['id']; ?>]"
-                                                value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
-                                                class="form-control text-end fw-bold input-valor input-receita"
-                                                placeholder="0.00">
-                                        </div>
+
+                                        <?php if ($isMult): ?>
+                                            <div class="d-flex flex-wrap align-items-center gap-1 justify-content-sm-end">
+                                                <!-- Quantidade -->
+                                                <div class="input-group input-group-sm" style="width: 105px;">
+                                                    <span class="input-group-text bg-white text-secondary px-2" title="<?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?>">
+                                                        <?php echo htmlspecialchars(mb_substr($item['label_multiplicador'] ?? 'Dias', 0, 5)); ?>
+                                                    </span>
+                                                    <input type="number" step="any" min="0" 
+                                                        name="valores[<?php echo $item['id']; ?>][quantidade]"
+                                                        id="qtd_<?php echo $item['id']; ?>"
+                                                        data-id="<?php echo $item['id']; ?>"
+                                                        value="<?php echo (float) ($item['quantidade'] ?? 1); ?>"
+                                                        class="form-control text-end fw-semibold input-multiplicador-qtd"
+                                                        placeholder="0">
+                                                </div>
+
+                                                <span class="text-secondary fw-bold small">&times;</span>
+
+                                                <!-- Valor Unitário -->
+                                                <div class="input-group input-group-sm" style="width: 115px;">
+                                                    <span class="input-group-text bg-white text-secondary px-2">R$</span>
+                                                    <input type="number" step="0.01" min="0" 
+                                                        name="valores[<?php echo $item['id']; ?>][valor_unitario]"
+                                                        id="unit_<?php echo $item['id']; ?>"
+                                                        data-id="<?php echo $item['id']; ?>"
+                                                        value="<?php echo number_format($item['valor_unitario'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
+                                                        class="form-control text-end fw-semibold input-multiplicador-unit"
+                                                        placeholder="0.00">
+                                                </div>
+
+                                                <span class="text-secondary fw-bold small">=</span>
+
+                                                <!-- Total Calculado -->
+                                                <div class="input-group input-group-sm" style="width: 130px;">
+                                                    <span class="input-group-text bg-light text-secondary px-2">R$</span>
+                                                    <input type="number" step="0.01" min="0" readonly
+                                                        name="valores[<?php echo $item['id']; ?>][valor]"
+                                                        id="total_var_<?php echo $item['id']; ?>"
+                                                        value="<?php echo number_format($item['valor'] ?? 0, 2, '.', ''); ?>"
+                                                        class="form-control text-end fw-bold bg-light input-valor input-receita"
+                                                        placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="input-group" style="max-width: 200px;">
+                                                <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
+                                                <input type="number" step="0.01" min="0" 
+                                                    name="valores[<?php echo $item['id']; ?>]"
+                                                    value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
+                                                    class="form-control text-end fw-bold input-valor input-receita"
+                                                    placeholder="0.00">
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -301,19 +364,79 @@ if ($proximoMes > 12) {
                         <div class="card-body p-3 p-md-4">
                             <div class="d-flex flex-column gap-3" id="listaDespesas">
                                 <?php foreach ($variaveisDespesas as $item): ?>
+                                    <?php $isMult = ($item['tipo_calculo'] ?? 'simples') === 'multiplicador'; ?>
                                     <div class="p-3 bg-light rounded-3 border d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
                                         <div>
-                                            <span class="fw-semibold text-dark d-block"><?php echo htmlspecialchars($item['nome']); ?></span>
-                                            <span class="text-secondary small">Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?></span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="fw-semibold text-dark"><?php echo htmlspecialchars($item['nome']); ?></span>
+                                                <?php if ($isMult): ?>
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle small py-1" style="font-size: 0.72rem;">
+                                                        <i class="bi bi-calculator me-1"></i> Multiplicador
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <span class="text-secondary small">
+                                                <?php if ($isMult): ?>
+                                                    Cálculo: <?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?> &times; R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>/unid.
+                                                <?php else: ?>
+                                                    Padrão: R$ <?php echo number_format($item['valor_padrao'], 2, ',', '.'); ?>
+                                                <?php endif; ?>
+                                            </span>
                                         </div>
-                                        <div class="input-group" style="max-width: 200px;">
-                                            <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
-                                            <input type="number" step="0.01" min="0" 
-                                                name="valores[<?php echo $item['id']; ?>]"
-                                                value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
-                                                class="form-control text-end fw-bold input-valor input-despesa"
-                                                placeholder="0.00">
-                                        </div>
+
+                                        <?php if ($isMult): ?>
+                                            <div class="d-flex flex-wrap align-items-center gap-1 justify-content-sm-end">
+                                                <!-- Quantidade -->
+                                                <div class="input-group input-group-sm" style="width: 105px;">
+                                                    <span class="input-group-text bg-white text-secondary px-2" title="<?php echo htmlspecialchars($item['label_multiplicador'] ?? 'Dias'); ?>">
+                                                        <?php echo htmlspecialchars(mb_substr($item['label_multiplicador'] ?? 'Dias', 0, 5)); ?>
+                                                    </span>
+                                                    <input type="number" step="any" min="0" 
+                                                        name="valores[<?php echo $item['id']; ?>][quantidade]"
+                                                        id="qtd_<?php echo $item['id']; ?>"
+                                                        data-id="<?php echo $item['id']; ?>"
+                                                        value="<?php echo (float) ($item['quantidade'] ?? 1); ?>"
+                                                        class="form-control text-end fw-semibold input-multiplicador-qtd"
+                                                        placeholder="0">
+                                                </div>
+
+                                                <span class="text-secondary fw-bold small">&times;</span>
+
+                                                <!-- Valor Unitário -->
+                                                <div class="input-group input-group-sm" style="width: 115px;">
+                                                    <span class="input-group-text bg-white text-secondary px-2">R$</span>
+                                                    <input type="number" step="0.01" min="0" 
+                                                        name="valores[<?php echo $item['id']; ?>][valor_unitario]"
+                                                        id="unit_<?php echo $item['id']; ?>"
+                                                        data-id="<?php echo $item['id']; ?>"
+                                                        value="<?php echo number_format($item['valor_unitario'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
+                                                        class="form-control text-end fw-semibold input-multiplicador-unit"
+                                                        placeholder="0.00">
+                                                </div>
+
+                                                <span class="text-secondary fw-bold small">=</span>
+
+                                                <!-- Total Calculado -->
+                                                <div class="input-group input-group-sm" style="width: 130px;">
+                                                    <span class="input-group-text bg-light text-secondary px-2">R$</span>
+                                                    <input type="number" step="0.01" min="0" readonly
+                                                        name="valores[<?php echo $item['id']; ?>][valor]"
+                                                        id="total_var_<?php echo $item['id']; ?>"
+                                                        value="<?php echo number_format($item['valor'] ?? 0, 2, '.', ''); ?>"
+                                                        class="form-control text-end fw-bold bg-light input-valor input-despesa"
+                                                        placeholder="0.00">
+                                                </div>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="input-group" style="max-width: 200px;">
+                                                <span class="input-group-text bg-white border-end-0 text-secondary">R$</span>
+                                                <input type="number" step="0.01" min="0" 
+                                                    name="valores[<?php echo $item['id']; ?>]"
+                                                    value="<?php echo number_format($item['valor'] ?? $item['valor_padrao'], 2, '.', ''); ?>"
+                                                    class="form-control text-end fw-bold input-valor input-despesa"
+                                                    placeholder="0.00">
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -373,18 +496,44 @@ if ($proximoMes > 12) {
 
                         <div class="mb-3">
                             <label for="nomeVariavel" class="form-label small fw-semibold text-secondary">Nome do Campo</label>
-                            <input type="text" class="form-control" id="nomeVariavel" name="nome" placeholder="Ex: Netflix, Gemini, Academia, Renda Extra..." required>
+                            <input type="text" class="form-control" id="nomeVariavel" name="nome" placeholder="Ex: Ajuda Mãe, Netflix, Freelance, Academia..." required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="valorPadrao" class="form-label small fw-semibold text-secondary">Valor Padrão Sugerido (R$)</label>
+                            <label class="form-label small fw-semibold text-secondary">Modo de Cálculo</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_calculo" id="modalCalcSimples" value="simples" checked>
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2" for="modalCalcSimples">
+                                        <span class="fw-bold d-block small"><i class="bi bi-cash me-1"></i> Valor Fixo</span>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Valor único (R$)</span>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="tipo_calculo" id="modalCalcMultiplicador" value="multiplicador">
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2" for="modalCalcMultiplicador">
+                                        <span class="fw-bold d-block small"><i class="bi bi-calculator me-1"></i> Multiplicador</span>
+                                        <span class="text-muted" style="font-size: 0.72rem;">Qtd &times; Valor</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-none" id="modalContainerMultiplicador">
+                            <label for="modalLabelMultiplicador" class="form-label small fw-semibold text-secondary">Rótulo da Quantidade</label>
+                            <input type="text" class="form-control" id="modalLabelMultiplicador" name="label_multiplicador" placeholder="Ex: Dias, Horas, Diárias" value="Dias">
+                            <small class="text-secondary">Nome do multiplicador (ex: dias trabalhados para calcular o repasse à mãe).</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valorPadrao" class="form-label small fw-semibold text-secondary" id="modalLabelValorPadrao">Valor Padrão Sugerido (R$)</label>
                             <input type="number" step="0.01" min="0" class="form-control" id="valorPadrao" name="valor_padrao" placeholder="0.00">
-                            <small class="text-secondary">Este valor será sugerido automaticamente em novos meses.</small>
+                            <small class="text-secondary" id="modalDicaValorPadrao">Este valor será sugerido automaticamente em novos meses.</small>
                         </div>
 
                         <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" role="switch" id="isFixo" name="is_fixo" value="1" checked>
-                            <label class="form-check-label small" for="isFixo">Repetir todo mês como valor fixo</label>
+                            <label class="form-check-label small" for="isFixo">Repetir todo mês no orçamento</label>
                         </div>
                     </div>
                     <div class="modal-footer border-top">
@@ -407,6 +556,20 @@ if ($proximoMes > 12) {
             return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
+        function recalcularLinhaMultiplicador(id) {
+            const qtdInput = document.getElementById('qtd_' + id);
+            const unitInput = document.getElementById('unit_' + id);
+            const totalInput = document.getElementById('total_var_' + id);
+
+            if (qtdInput && unitInput && totalInput) {
+                const qtd = parseFloat(qtdInput.value) || 0;
+                const unit = parseFloat(unitInput.value) || 0;
+                const total = qtd * unit;
+                totalInput.value = total.toFixed(2);
+            }
+            recalcularTotais();
+        }
+
         function recalcularTotais() {
             let totalReceitas = 0;
             let totalDespesas = 0;
@@ -423,34 +586,72 @@ if ($proximoMes > 12) {
 
             const saldo = totalReceitas - totalDespesas;
 
-            document.getElementById('cardTotalReceitas').innerText = formatarMoeda(totalReceitas);
-            document.getElementById('cardTotalDespesas').innerText = formatarMoeda(totalDespesas);
-            
-            const cardSaldo = document.getElementById('cardSaldo');
-            cardSaldo.innerText = formatarMoeda(saldo);
-            if (saldo >= 0) {
-                cardSaldo.className = 'fw-bold text-primary mb-0 mt-1';
-            } else {
-                cardSaldo.className = 'fw-bold text-danger mb-0 mt-1';
+            const elTotalReceitas = document.getElementById('cardTotalReceitas');
+            const elTotalDespesas = document.getElementById('cardTotalDespesas');
+            const elSaldo = document.getElementById('cardSaldo');
+
+            if (elTotalReceitas) elTotalReceitas.innerText = formatarMoeda(totalReceitas);
+            if (elTotalDespesas) elTotalDespesas.innerText = formatarMoeda(totalDespesas);
+            if (elSaldo) {
+                elSaldo.innerText = formatarMoeda(saldo);
+                if (saldo >= 0) {
+                    elSaldo.className = 'fw-bold text-primary mb-0 mt-1';
+                } else {
+                    elSaldo.className = 'fw-bold text-danger mb-0 mt-1';
+                }
             }
         }
 
-        // Listener para recalcular dinamicamente conforme o usuário digita
-        document.querySelectorAll('.input-valor').forEach(input => {
+        // Listener para campos normais
+        document.querySelectorAll('.input-valor:not([readonly])').forEach(input => {
             input.addEventListener('input', recalcularTotais);
         });
 
+        // Listeners para campos multiplicadores (Qtd e Valor Unitário)
+        document.querySelectorAll('.input-multiplicador-qtd, .input-multiplicador-unit').forEach(input => {
+            input.addEventListener('input', function() {
+                const id = this.getAttribute('data-id');
+                recalcularLinhaMultiplicador(id);
+            });
+        });
+
+        // Toggle do Modo de Cálculo no Modal
+        const modalCalcSimples = document.getElementById('modalCalcSimples');
+        const modalCalcMultiplicador = document.getElementById('modalCalcMultiplicador');
+        const modalContainerMultiplicador = document.getElementById('modalContainerMultiplicador');
+        const modalLabelValorPadrao = document.getElementById('modalLabelValorPadrao');
+        const modalDicaValorPadrao = document.getElementById('modalDicaValorPadrao');
+
+        function atualizarModoModal() {
+            if (modalCalcMultiplicador && modalCalcMultiplicador.checked) {
+                modalContainerMultiplicador.classList.remove('d-none');
+                modalLabelValorPadrao.innerText = 'Valor Unitário Padrão (R$)';
+                modalDicaValorPadrao.innerText = 'Ex: Valor pago por dia ou unidade trabalhada.';
+            } else if (modalContainerMultiplicador) {
+                modalContainerMultiplicador.classList.add('d-none');
+                modalLabelValorPadrao.innerText = 'Valor Padrão Sugerido (R$)';
+                modalDicaValorPadrao.innerText = 'Este valor será sugerido automaticamente em novos meses.';
+            }
+        }
+
+        if (modalCalcSimples && modalCalcMultiplicador) {
+            modalCalcSimples.addEventListener('change', atualizarModoModal);
+            modalCalcMultiplicador.addEventListener('change', atualizarModoModal);
+        }
+
         // Configurar botão de modal para pré-selecionar tipo
         const modalNovaVariavel = document.getElementById('modalNovaVariavel');
-        modalNovaVariavel.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const tipo = button ? button.getAttribute('data-tipo') : null;
-            if (tipo === 'despesa') {
-                document.getElementById('modalTipoDespesa').checked = true;
-            } else if (tipo === 'receita') {
-                document.getElementById('modalTipoReceita').checked = true;
-            }
-        });
+        if (modalNovaVariavel) {
+            modalNovaVariavel.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const tipo = button ? button.getAttribute('data-tipo') : null;
+                if (tipo === 'despesa') {
+                    document.getElementById('modalTipoDespesa').checked = true;
+                } else if (tipo === 'receita') {
+                    document.getElementById('modalTipoReceita').checked = true;
+                }
+            });
+        }
 
         // Calcular ao carregar a página
         document.addEventListener('DOMContentLoaded', recalcularTotais);

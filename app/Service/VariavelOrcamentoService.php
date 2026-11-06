@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\VariavelOrcamento;
+use App\Enum\TipoCalculo;
 use App\Enum\TipoVariavel;
 use App\Repository\VariavelOrcamentoRepository;
 use InvalidArgumentException;
@@ -24,6 +25,8 @@ class VariavelOrcamentoService
 
         $nome = trim((string) ($dados['nome'] ?? ''));
         $tipoRaw = strtolower(trim((string) ($dados['tipo'] ?? '')));
+        $tipoCalculoRaw = strtolower(trim((string) ($dados['tipo_calculo'] ?? 'simples')));
+        $labelMultiplicador = trim((string) ($dados['label_multiplicador'] ?? 'Dias'));
         $valorPadraoRaw = $dados['valor_padrao'] ?? 0.0;
         $isFixo = !empty($dados['is_fixo']);
         $ordem = (int) ($dados['ordem'] ?? 0);
@@ -42,6 +45,8 @@ class VariavelOrcamentoService
             throw new InvalidArgumentException("Tipo inválido. Escolha entre 'receita' ou 'despesa'.");
         }
 
+        $tipoCalculo = TipoCalculo::tryFrom($tipoCalculoRaw) ?? TipoCalculo::Simples;
+
         $valorPadrao = $this->sanitizarValorMonetario($valorPadraoRaw);
 
         if ($valorPadrao < 0) {
@@ -55,7 +60,9 @@ class VariavelOrcamentoService
             tipo: $tipo,
             isFixo: $isFixo,
             valorPadrao: $valorPadrao,
-            ordem: $ordem
+            ordem: $ordem,
+            tipoCalculo: $tipoCalculo,
+            labelMultiplicador: !empty($labelMultiplicador) ? $labelMultiplicador : 'Dias'
         );
 
         return $this->repository->inserir($variavel);

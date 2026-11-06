@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Enum\TipoCalculo;
 use App\Enum\TipoVariavel;
 use App\Repository\FinancaMensalRepository;
 use App\Repository\VariavelOrcamentoRepository;
@@ -17,7 +18,7 @@ class OrcamentoService
     ) {}
 
     /**
-     * Retorna o resumo completo de receitas, despesas e saldo do mês.
+     * Retorna o resumo completo de receitas, despesas e saldo do mês com suporte a cálculos.
      */
     public function obterDadosDoMes(int $contaId, int $mes, int $ano): array
     {
@@ -43,10 +44,14 @@ class OrcamentoService
         $valoresSalvos = $this->financaRepository->buscarValoresDoMes((int) $financa->getId());
         $mapaValores = [];
         foreach ($valoresSalvos as $val) {
-            $mapaValores[$val->getVariavelId()] = $val->getValor();
+            $mapaValores[$val->getVariavelId()] = [
+                'valor'          => $val->getValor(),
+                'quantidade'     => $val->getQuantidade() ?? 1.0,
+                'valor_unitario' => $val->getValorUnitario() ?? $val->getValor(),
+            ];
         }
 
-        // 4. Separa receitas e despesas com valores atuais (ou o valor padrão se não preenchido)
+        // 4. Separa receitas e despesas com valores atuais
         $receitas = [];
         $despesas = [];
         $totalReceitas = 0.0;
@@ -54,16 +59,33 @@ class OrcamentoService
 
         foreach ($variaveis as $var) {
             $varId = (int) $var->getId();
-            // Se o usuário já salvou um valor no mês, usa ele; senão, usa o valor padrão sugerido
-            $valorAtual = isset($mapaValores[$varId]) ? (float) $mapaValores[$varId] : $var->getValorPadrao();
+            $tipoCalculo = $var->getTipoCalculo();
+            $labelMultiplicador = $var->getLabelMultiplicador() ?? 'Dias';
+
+            if (isset($mapaValores[$varId])) {
+                $salvo = $mapaValores[$varId];
+                $quantidade = (float) $salvo['quantidade'];
+                $valorUnitario = (float) $salvo['valor_unitario'];
+                $valorAtual = (float) $salvo['valor'];
+            } else {
+                $quantidade = 1.0;
+                $valorUnitario = $var->getValorPadrao();
+                $valorAtual = ($tipoCalculo === TipoCalculo::Multiplicador) 
+                    ? ($quantidade * $valorUnitario) 
+                    : $var->getValorPadrao();
+            }
 
             $item = [
-                'id'           => $varId,
-                'nome'         => $var->getNome(),
-                'tipo'         => $var->getTipo()->value,
-                'valor_padrao' => $var->getValorPadrao(),
-                'valor'        => $valorAtual,
-                'is_fixo'      => $var->isFixo(),
+                'id'                  => $varId,
+                'nome'                => $var->getNome(),
+                'tipo'                => $var->getTipo()->value,
+                'tipo_calculo'        => $tipoCalculo->value,
+                'label_multiplicador' => $labelMultiplicador,
+                'valor_padrao'        => $var->getValorPadrao(),
+                'quantidade'          => $quantidade,
+                'valor_unitario'      => $valorUnitario,
+                'valor'               => $valorAtual,
+                'is_fixo'             => $var->isFixo(),
             ];
 
             if ($var->getTipo() === TipoVariavel::Receita) {
@@ -92,7 +114,7 @@ class OrcamentoService
     /**
      * Salva os valores informados pelo formulário do mês.
      *
-     * @param array<int, mixed> $valoresFormulario [variavel_id => valor]
+     * @param array<int, mixed> $valoresFormulario [variavel_id => ['quantidade' => x, 'valor_unitario' => y, 'valor' => z] ou float]
      */
     public function salvarValoresDoMes(int $contaId, int $mes, int $ano, array $valoresFormulario): void
     {
@@ -103,14 +125,36 @@ class OrcamentoService
         $financa = $this->financaRepository->obterOuCriar($contaId, $mes, $ano);
 
         $valoresSanitizados = [];
-        foreach ($valoresFormulario as $variavelId => $valorRaw) {
+        foreach ($valoresFormulario as $variavelId => $dadosInput) {
             $id = (int) $variavelId;
             if ($id <= 0) {
                 continue;
             }
 
-            $valorNumerico = $this->sanitizarValorMonetario($valorRaw);
-            $valoresSanitizados[$id] = $valorNumerico;
+            if (is_array($dadosInput)) {
+                $qtd = isset($dadosInput['quantidade']) ? $this->sanitizarValorMonetario($dadosInput['quantidade']) : 1.0;
+                $unit = isset($dadosInput['valor_unitario']) ? $this->sanitizarValorMonetario($dadosInput['valor_unitario']) : 0.0;
+                $valorCalculado = $qtd * $unit;
+                $valor = isset($dadosInput['valor']) ? $this->sanitizarValorMonetario($dadosInput['valor']) : $valorCalculado;
+
+                // Se o modo for multiplicador, garante que o valor seja qtd * unit
+                if (isset($dadosInput['quantidade']) && isset($dadosInput['valor_unitario'])) {
+                    $valor = $valorCalculado;
+                }
+
+                $valoresSanitizados[$id] = [
+                    'quantidade'     => $qtd,
+                    'valor_unitario' => $unit,
+                    'valor'          => round($valor, 2),
+                ];
+            } else {
+                $valor = $this->sanitizarValorMonetario($dadosInput);
+                $valoresSanitizados[$id] = [
+                    'quantidade'     => 1.0,
+                    'valor_unitario' => $valor,
+                    'valor'          => round($valor, 2),
+                ];
+            }
         }
 
         $this->financaRepository->salvarLoteValores((int) $financa->getId(), $valoresSanitizados);

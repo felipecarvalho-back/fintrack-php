@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\VariavelOrcamento;
+use App\Enum\TipoCalculo;
 use App\Enum\TipoVariavel;
 use PDO;
 
@@ -20,18 +21,20 @@ class VariavelOrcamentoRepository
             ? $variavel->getOrdem()
             : $this->proximaOrdem($variavel->getContaId(), $variavel->getTipo()->value);
 
-        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, is_fixo, valor_padrao, ordem)
-                VALUES (:conta_id, :nome, :tipo, :is_fixo, :valor_padrao, :ordem)";
+        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, valor_padrao, ordem)
+                VALUES (:conta_id, :nome, :tipo, :tipo_calculo, :label_multiplicador, :is_fixo, :valor_padrao, :ordem)";
 
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-            ':conta_id'     => $variavel->getContaId(),
-            ':nome'         => $variavel->getNome(),
-            ':tipo'         => $variavel->getTipo()->value,
-            ':is_fixo'      => $variavel->getIsFixo() ? 1 : 0,
-            ':valor_padrao' => $variavel->getValorPadrao(),
-            ':ordem'        => $ordem
+            ':conta_id'            => $variavel->getContaId(),
+            ':nome'                => $variavel->getNome(),
+            ':tipo'                => $variavel->getTipo()->value,
+            ':tipo_calculo'        => $variavel->getTipoCalculo()->value,
+            ':label_multiplicador' => $variavel->getLabelMultiplicador() ?? 'Dias',
+            ':is_fixo'             => $variavel->getIsFixo() ? 1 : 0,
+            ':valor_padrao'        => $variavel->getValorPadrao(),
+            ':ordem'               => $ordem
         ]);
 
         return (int) $this->pdo->lastInsertId();
@@ -39,7 +42,7 @@ class VariavelOrcamentoRepository
 
     public function buscarPorConta(int $contaId): array
     {
-        $sql = "SELECT id, conta_id, nome, tipo, is_fixo, valor_padrao, ordem 
+        $sql = "SELECT id, conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, valor_padrao, ordem 
                 FROM variaveis_orcamento 
                 WHERE conta_id = :conta_id 
                 ORDER BY tipo ASC, ordem ASC, id ASC";
@@ -50,6 +53,9 @@ class VariavelOrcamentoRepository
 
         $resultado = [];
         foreach ($rows as $row) {
+            $tipoCalcRaw = (string) ($row['tipo_calculo'] ?? 'simples');
+            $tipoCalculo = TipoCalculo::tryFrom($tipoCalcRaw) ?? TipoCalculo::Simples;
+
             $resultado[] = new VariavelOrcamento(
                 id: (int) $row['id'],
                 contaId: (int) $row['conta_id'],
@@ -57,7 +63,9 @@ class VariavelOrcamentoRepository
                 tipo: TipoVariavel::from((string) $row['tipo']),
                 isFixo: (bool) $row['is_fixo'],
                 valorPadrao: (float) $row['valor_padrao'],
-                ordem: (int) $row['ordem']
+                ordem: (int) $row['ordem'],
+                tipoCalculo: $tipoCalculo,
+                labelMultiplicador: (string) ($row['label_multiplicador'] ?? 'Dias')
             );
         }
 
