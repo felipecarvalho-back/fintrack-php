@@ -66,6 +66,18 @@ class VariavelOrcamentoService
         $mesesAplicaveis = implode(',', $mesesArray);
         $isFixo = (count($mesesArray) === 12);
 
+        // Processar ano (null = recorrente em todos os anos; ou ano específico ex: 2026)
+        $ano = null;
+        $anoTipo = $dados['ano_tipo'] ?? 'todos'; // 'todos' ou 'especifico'
+        if ($anoTipo === 'especifico' || !empty($dados['aplica_ano_especifico'])) {
+            $anoVal = (int) ($dados['ano'] ?? date('Y'));
+            if ($anoVal >= 2000 && $anoVal <= 2100) {
+                $ano = $anoVal;
+                // Se é restrito a um ano específico, não deve ser considerado estritamente fixo eterno
+                $isFixo = false;
+            }
+        }
+
         if (empty($nome)) {
             throw new InvalidArgumentException("O nome do campo é obrigatório.");
         }
@@ -98,7 +110,8 @@ class VariavelOrcamentoService
             ordem: $ordem,
             tipoCalculo: $tipoCalculo,
             labelMultiplicador: !empty($labelMultiplicador) ? $labelMultiplicador : 'Dias',
-            mesesAplicaveis: $mesesAplicaveis
+            mesesAplicaveis: $mesesAplicaveis,
+            ano: $ano
         );
 
         return $this->repository->inserir($variavel);

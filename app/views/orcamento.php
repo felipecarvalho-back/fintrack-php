@@ -152,6 +152,9 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </head>
 
 <body>
@@ -442,18 +445,34 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
 
     </main>
 
-    <!-- Modal Nova Variável Personalizada -->
+    <!-- Modal Nova Variável Personalizada (Alpine.js Powered) -->
     <div class="modal fade" id="modalNovaVariavel" tabindex="-1" aria-labelledby="modalNovaVariavelLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow rounded-4">
-                <div class="modal-header border-bottom">
-                    <h5 class="modal-title fw-bold" id="modalNovaVariavelLabel">Nova Variável de Orçamento</h5>
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" 
+                 x-data="modalVariavelHandler(<?php echo (int) $mesAtual; ?>, <?php echo (int) $anoAtual; ?>)">
+                
+                <!-- Cabeçalho Elegante -->
+                <div class="modal-header border-bottom bg-light px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge p-2 rounded-3" 
+                              :class="tipo === 'receita' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                            <i class="bi fs-5" :class="tipo === 'receita' ? 'bi-plus-circle-fill' : 'bi-dash-circle-fill'"></i>
+                        </span>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Novo Campo no Orçamento</h5>
+                            <span class="text-secondary small" style="font-size: 0.75rem;">Cadastre despesas ou receitas com periodicidade personalizada</span>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
+
                 <form action="/variaveis/adicionar" method="POST">
                     <input type="hidden" name="origem" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/orcamento'); ?>">
                     <input type="hidden" name="mes" value="<?php echo $mesAtual; ?>">
-                    <input type="hidden" name="ano" value="<?php echo $anoAtual; ?>">
+                    <input type="hidden" name="tipo" :value="tipo">
+                    <input type="hidden" name="tipo_calculo" :value="tipoCalculo">
+                    <input type="hidden" name="ano_tipo" :value="anoTipo">
+
                     <div class="modal-body p-4">
 
                         <!-- Alerta de Erro de Validação -->
@@ -464,91 +483,170 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
                             </div>
                         <?php endif; ?>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Tipo do Campo</label>
-                            <div class="btn-group w-100" role="group">
-                                <input type="radio" class="btn-check" name="tipo" id="modalTipoReceita" value="receita" checked>
-                                <label class="btn btn-outline-success" for="modalTipoReceita"><i class="bi bi-plus-circle me-1"></i> Receita</label>
+                        <!-- Seletor Tipo: Receita vs Despesa (Pill Tabs Modernos) -->
+                        <div class="p-1 bg-light rounded-3 d-flex gap-1 border mb-3">
+                            <button type="button" class="btn btn-sm flex-fill rounded-2 fw-semibold transition-all py-2"
+                                :class="tipo === 'receita' ? 'bg-success text-white shadow-sm' : 'text-secondary hover-bg-white border-0'"
+                                @click="tipo = 'receita'">
+                                <i class="bi bi-arrow-down-left me-1"></i> Receita (+ Ganho)
+                            </button>
+                            <button type="button" class="btn btn-sm flex-fill rounded-2 fw-semibold transition-all py-2"
+                                :class="tipo === 'despesa' ? 'bg-danger text-white shadow-sm' : 'text-secondary hover-bg-white border-0'"
+                                @click="tipo = 'despesa'">
+                                <i class="bi bi-arrow-up-right me-1"></i> Despesa (- Gasto)
+                            </button>
+                        </div>
 
-                                <input type="radio" class="btn-check" name="tipo" id="modalTipoDespesa" value="despesa">
-                                <label class="btn btn-outline-danger" for="modalTipoDespesa"><i class="bi bi-dash-circle me-1"></i> Despesa</label>
+                        <!-- Nome do Campo -->
+                        <div class="mb-3">
+                            <label for="nomeVariavel" class="form-label small fw-semibold text-secondary">Nome do Campo</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    <i class="bi bi-tag"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0 ps-0" id="nomeVariavel" name="nome"
+                                    placeholder="Ex: Ajuda Mãe, Netflix, Freelance, Academia..." required>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="nomeVariavel" class="form-label small fw-semibold text-secondary">Nome do Campo</label>
-                            <input type="text" class="form-control" id="nomeVariavel" name="nome" placeholder="Ex: Ajuda Mãe, Netflix, Freelance, Academia..." required>
-                        </div>
-
+                        <!-- Modo de Cálculo (Cards Clicáveis) -->
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-secondary">Modo de Cálculo</label>
                             <div class="row g-2">
                                 <div class="col-6">
-                                    <input type="radio" class="btn-check" name="tipo_calculo" id="modalCalcSimples" value="simples" checked>
-                                    <label class="btn btn-outline-secondary w-100 text-start p-2" for="modalCalcSimples">
-                                        <span class="fw-bold d-block small"><i class="bi bi-cash me-1"></i> Valor Fixo</span>
-                                        <span class="text-muted" style="font-size: 0.72rem;">Valor único (R$)</span>
-                                    </label>
+                                    <div class="p-2 rounded-3 cursor-pointer transition-all border d-flex align-items-center gap-2"
+                                         :class="tipoCalculo === 'simples' ? 'border-primary bg-primary-subtle text-primary shadow-sm' : 'bg-light text-secondary border-dashed hover-bg-white'"
+                                         @click="tipoCalculo = 'simples'">
+                                        <i class="bi bi-cash-stack fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold small">Valor Direto</div>
+                                            <div class="small opacity-75" style="font-size: 0.7rem;">R$ fixo ou variável</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-6">
-                                    <input type="radio" class="btn-check" name="tipo_calculo" id="modalCalcMultiplicador" value="multiplicador">
-                                    <label class="btn btn-outline-secondary w-100 text-start p-2" for="modalCalcMultiplicador">
-                                        <span class="fw-bold d-block small"><i class="bi bi-calculator me-1"></i> Multiplicador</span>
-                                        <span class="text-muted" style="font-size: 0.72rem;">Qtd &times; Valor</span>
-                                    </label>
+                                    <div class="p-2 rounded-3 cursor-pointer transition-all border d-flex align-items-center gap-2"
+                                         :class="tipoCalculo === 'multiplicador' ? 'border-primary bg-primary-subtle text-primary shadow-sm' : 'bg-light text-secondary border-dashed hover-bg-white'"
+                                         @click="tipoCalculo = 'multiplicador'">
+                                        <i class="bi bi-calculator fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold small">Multiplicador</div>
+                                            <div class="small opacity-75" style="font-size: 0.7rem;">Qtd &times; Valor Unitário</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3 d-none" id="modalContainerMultiplicador">
-                            <label for="modalLabelMultiplicador" class="form-label small fw-semibold text-secondary">Rótulo da Quantidade</label>
-                            <input type="text" class="form-control" id="modalLabelMultiplicador" name="label_multiplicador" placeholder="Ex: Dias, Horas, Diárias" value="Dias">
-                            <small class="text-secondary">Nome do multiplicador (ex: dias trabalhados para calcular o repasse à mãe).</small>
+                        <!-- Campo Multiplicador Dinâmico -->
+                        <div x-show="tipoCalculo === 'multiplicador'" x-transition class="mb-3 p-3 bg-light rounded-3 border">
+                            <label for="labelMultiplicador" class="form-label small fw-semibold text-secondary">Rótulo da Quantidade</label>
+                            <input type="text" class="form-control form-control-sm" id="labelMultiplicador" name="label_multiplicador"
+                                x-model="labelMultiplicador" placeholder="Ex: Dias, Horas, Diárias, Viagens">
+                            <small class="text-secondary" style="font-size: 0.72rem;">Ex: dias trabalhados para calcular o repasse à mãe.</small>
                         </div>
 
+                        <!-- Valor Padrão -->
                         <div class="mb-3">
-                            <label for="valorPadrao" class="form-label small fw-semibold text-secondary" id="modalLabelValorPadrao">Valor Padrão Sugerido (R$)</label>
-                            <input type="number" step="0.01" min="0" class="form-control" id="valorPadrao" name="valor_padrao" placeholder="0.00">
-                            <small class="text-secondary" id="modalDicaValorPadrao">Este valor será sugerido automaticamente em novos meses.</small>
+                            <label for="valorPadrao" class="form-label small fw-semibold text-secondary"
+                                x-text="tipoCalculo === 'multiplicador' ? 'Valor Unitário Padrão (R$)' : 'Valor Padrão Sugerido (R$)'"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0 text-muted">R$</span>
+                                <input type="number" step="0.01" min="0" class="form-control border-start-0 ps-0" id="valorPadrao" name="valor_padrao"
+                                    x-model="valorPadrao" placeholder="0.00">
+                            </div>
+                            <small class="text-secondary" style="font-size: 0.72rem;"
+                                x-text="tipoCalculo === 'multiplicador' ? 'Valor pago por unidade (ex: R$ 12,20 por dia).' : 'Este valor será sugerido automaticamente nos meses programados.'"></small>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Meses em que a Variável se Aplica</label>
-                            <div class="d-flex flex-wrap gap-2 mb-2">
-                                <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2" onclick="selecionarTodosMeses('orc_mes_')">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Todos os meses
+                        <!-- Painel de Programação (Meses e Ano) -->
+                        <div class="card border-0 bg-light rounded-3 p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label small fw-bold text-dark mb-0">
+                                    <i class="bi bi-calendar-week me-1 text-primary"></i> Programação & Frequência
+                                </label>
+                                <!-- Seletor Ano Recorrente vs Ano Específico -->
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-xs py-1 px-2 transition-all"
+                                        :class="anoTipo === 'todos' ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-white'"
+                                        @click="anoTipo = 'todos'">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Todo ano
+                                    </button>
+                                    <button type="button" class="btn btn-xs py-1 px-2 transition-all"
+                                        :class="anoTipo === 'especifico' ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-white'"
+                                        @click="anoTipo = 'especifico'">
+                                        <i class="bi bi-calendar-check me-1"></i> Ano específico
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Input de Ano Específico -->
+                            <div x-show="anoTipo === 'especifico'" x-transition class="mb-2 py-2 px-3 bg-white rounded-2 border d-flex align-items-center justify-content-between">
+                                <span class="small text-secondary fw-semibold">Ano de aplicação:</span>
+                                <div class="input-group input-group-sm" style="width: 140px;">
+                                    <button type="button" class="btn btn-outline-secondary" @click="ano = parseInt(ano) - 1">-</button>
+                                    <input type="number" name="ano" class="form-control text-center fw-bold text-primary" x-model="ano" min="2020" max="2099">
+                                    <button type="button" class="btn btn-outline-secondary" @click="ano = parseInt(ano) + 1">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Atalhos de Meses -->
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill transition-all"
+                                    :class="meses.length === 12 ? 'btn-primary text-white shadow-sm' : 'btn-white border text-secondary'"
+                                    @click="selecionarTodosMeses()">
+                                    Todos os meses
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="selecionarApenasMes('orc_mes_', <?php echo (int) $mesAtual; ?>)">
-                                    <i class="bi bi-calendar-event me-1"></i> Apenas <?php echo $nomeMesAtual; ?>
+                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
+                                    @click="selecionarApenasMes(<?php echo (int) $mesAtual; ?>)">
+                                    Apenas <?php echo $nomeMesAtual; ?>
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-light text-muted border py-1 px-2" onclick="limparMeses('orc_mes_')">
+                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
+                                    @click="selecionarSemestre(1)">
+                                    1º Semestre
+                                </button>
+                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
+                                    @click="selecionarSemestre(2)">
+                                    2º Semestre
+                                </button>
+                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-danger transition-all"
+                                    @click="limparMeses()">
                                     Limpar
                                 </button>
                             </div>
 
-                            <div class="row g-1 text-center">
-                                <?php
-                                $siglasMeses = [
-                                    1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr',
-                                    5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
-                                    9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'
-                                ];
-                                foreach ($siglasMeses as $mNum => $mSigla):
-                                ?>
-                                <div class="col-3 col-sm-2">
-                                    <input type="checkbox" class="btn-check" name="meses[]" id="orc_mes_<?php echo $mNum; ?>" value="<?php echo $mNum; ?>" checked>
-                                    <label class="btn btn-sm btn-outline-primary w-100 py-1" for="orc_mes_<?php echo $mNum; ?>">
-                                        <?php echo $mSigla; ?>
-                                    </label>
-                                </div>
-                                <?php endforeach; ?>
+                            <!-- Grid dos 12 meses -->
+                            <div class="d-grid" style="grid-template-columns: repeat(6, 1fr); gap: 6px;">
+                                <template x-for="(mNome, mNum) in {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}" :key="mNum">
+                                    <button type="button" class="btn btn-sm py-2 px-1 text-center rounded-2 transition-all fw-semibold"
+                                        :class="temMes(parseInt(mNum)) 
+                                            ? 'btn-primary text-white shadow-sm' 
+                                            : 'btn-outline-light text-secondary border bg-white hover-bg-white'"
+                                        @click="alternarMes(parseInt(mNum))">
+                                        <span x-text="mNome" style="font-size: 0.8rem;"></span>
+                                        <i x-show="temMes(parseInt(mNum))" class="bi bi-check2 d-block" style="font-size: 0.65rem; line-height: 1;"></i>
+                                    </button>
+                                </template>
                             </div>
-                            <small class="text-secondary d-block mt-1">Marque os meses em que esta variável deve entrar no orçamento.</small>
+
+                            <!-- Inputs hidden dos meses[] -->
+                            <template x-for="m in meses" :key="m">
+                                <input type="hidden" name="meses[]" :value="m">
+                            </template>
+
+                            <!-- Resumo Dinâmico em Tempo Real -->
+                            <div class="mt-2 pt-2 border-top d-flex align-items-center gap-1 text-secondary" style="font-size: 0.74rem;">
+                                <i class="bi bi-info-circle text-primary"></i>
+                                <span>Vai entrar em: <strong class="text-dark" x-text="resumoProgramacao()"></strong></span>
+                            </div>
                         </div>
+
                     </div>
-                    <div class="modal-footer border-top">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Cadastrar Variável</button>
+                    <div class="modal-footer border-top bg-light px-4 py-3">
+                        <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Cadastrar Variável
+                        </button>
                     </div>
                 </form>
             </div>
@@ -625,57 +723,71 @@ function renderLinhaVariavel(array $item, string $tipoClasse): void {
             });
         });
 
-        // Toggle do Modo de Cálculo no Modal
-        const modalCalcSimples = document.getElementById('modalCalcSimples');
-        const modalCalcMultiplicador = document.getElementById('modalCalcMultiplicador');
-        const modalContainerMultiplicador = document.getElementById('modalContainerMultiplicador');
-        const modalLabelValorPadrao = document.getElementById('modalLabelValorPadrao');
-        const modalDicaValorPadrao = document.getElementById('modalDicaValorPadrao');
+        // Alpine.js Component para o Modal de Criação de Variável
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('modalVariavelHandler', (mesPadrao, anoPadrao) => ({
+                tipo: 'despesa',
+                tipoCalculo: 'simples',
+                labelMultiplicador: 'Dias',
+                valorPadrao: '',
+                anoTipo: 'todos',
+                ano: anoPadrao || new Date().getFullYear(),
+                meses: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                
+                init() {
+                    const modalEl = document.getElementById('modalNovaVariavel');
+                    if (modalEl) {
+                        modalEl.addEventListener('show.bs.modal', (event) => {
+                            const btn = event.relatedTarget;
+                            if (btn && btn.getAttribute('data-tipo')) {
+                                this.tipo = btn.getAttribute('data-tipo');
+                            }
+                        });
+                    }
+                },
 
-        function atualizarModoModal() {
-            if (modalCalcMultiplicador && modalCalcMultiplicador.checked) {
-                modalContainerMultiplicador.classList.remove('d-none');
-                modalLabelValorPadrao.innerText = 'Valor Unitário Padrão (R$)';
-                modalDicaValorPadrao.innerText = 'Ex: Valor pago por dia ou unidade trabalhada.';
-            } else if (modalContainerMultiplicador) {
-                modalContainerMultiplicador.classList.add('d-none');
-                modalLabelValorPadrao.innerText = 'Valor Padrão Sugerido (R$)';
-                modalDicaValorPadrao.innerText = 'Este valor será sugerido automaticamente em novos meses.';
-            }
-        }
-
-        if (modalCalcSimples && modalCalcMultiplicador) {
-            modalCalcSimples.addEventListener('change', atualizarModoModal);
-            modalCalcMultiplicador.addEventListener('change', atualizarModoModal);
-        }
-
-        // Configurar botão de modal para pré-selecionar tipo
-        const modalNovaVariavel = document.getElementById('modalNovaVariavel');
-        if (modalNovaVariavel) {
-            modalNovaVariavel.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                const tipo = button ? button.getAttribute('data-tipo') : null;
-                if (tipo === 'despesa') {
-                    document.getElementById('modalTipoDespesa').checked = true;
-                } else if (tipo === 'receita') {
-                    document.getElementById('modalTipoReceita').checked = true;
+                selecionarTodosMeses() {
+                    this.meses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                },
+                selecionarApenasMes(m) {
+                    this.meses = [m];
+                },
+                selecionarSemestre(sem) {
+                    this.meses = sem === 1 ? [1, 2, 3, 4, 5, 6] : [7, 8, 9, 10, 11, 12];
+                },
+                limparMeses() {
+                    this.meses = [];
+                },
+                alternarMes(m) {
+                    if (this.meses.includes(m)) {
+                        this.meses = this.meses.filter(x => x !== m);
+                    } else {
+                        this.meses.push(m);
+                        this.meses.sort((a, b) => a - b);
+                    }
+                },
+                temMes(m) {
+                    return this.meses.includes(m);
+                },
+                resumoProgramacao() {
+                    let texto = '';
+                    if (this.meses.length === 12) {
+                        texto = 'Todos os meses';
+                    } else if (this.meses.length === 0) {
+                        texto = 'Nenhum mês selecionado';
+                    } else {
+                        const nomes = {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+                        texto = this.meses.map(m => nomes[m]).join(', ');
+                    }
+                    if (this.anoTipo === 'especifico') {
+                        texto += ' de ' + this.ano;
+                    } else {
+                        texto += ' (recorrente todo ano)';
+                    }
+                    return texto;
                 }
-            });
-        }
-
-        function selecionarTodosMeses(prefixo) {
-            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = true);
-        }
-
-        function selecionarApenasMes(prefixo, mes) {
-            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = false);
-            const alvo = document.getElementById(prefixo + mes);
-            if (alvo) alvo.checked = true;
-        }
-
-        function limparMeses(prefixo) {
-            document.querySelectorAll('[id^="' + prefixo + '"]').forEach(cb => cb.checked = false);
-        }
+            }));
+        });
 
         // Calcular ao carregar a página
         document.addEventListener('DOMContentLoaded', recalcularTotais);

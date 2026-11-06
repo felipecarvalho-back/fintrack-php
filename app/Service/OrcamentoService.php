@@ -62,8 +62,8 @@ class OrcamentoService
             $tipoCalculo = $var->getTipoCalculo();
             $labelMultiplicador = $var->getLabelMultiplicador() ?? 'Dias';
 
-            // Verifica se a variável se aplica a este mês
-            $aplicaNesteMes = $var->aplicaNoMes($mes);
+            // Verifica se a variável se aplica a este período (mês e ano)
+            $aplicaNestePeriodo = $var->aplicaNoMesEAno($mes, $ano);
 
             if (isset($mapaValores[$varId])) {
                 // Já existe lançamento salvo especificamente para este mês
@@ -71,8 +71,8 @@ class OrcamentoService
                 $quantidade = (float) $salvo['quantidade'];
                 $valorUnitario = (float) $salvo['valor_unitario'];
                 $valorAtual = (float) $salvo['valor'];
-            } elseif ($aplicaNesteMes) {
-                // Não tem lançamento salvo neste mês, mas a variável está programada para este mês:
+            } elseif ($aplicaNestePeriodo) {
+                // Não tem lançamento salvo neste mês, mas a variável está programada para este período:
                 // Herda o último valor salvo mais recente ou o padrão cadastrado
                 $ultimoSalvo = $this->financaRepository->buscarUltimoValorSalvo($contaId, $varId, $ano, $mes);
                 if ($ultimoSalvo !== null) {
@@ -89,7 +89,7 @@ class OrcamentoService
                         : $var->getValorPadrao();
                 }
             } else {
-                // Não se aplica a este mês e não tem lançamento salvo
+                // Não se aplica a este mês/ano e não tem lançamento salvo nele
                 continue;
             }
 
@@ -105,6 +105,7 @@ class OrcamentoService
                 'valor'               => $valorAtual,
                 'is_fixo'             => $var->isFixo(),
                 'meses_aplicaveis'    => $var->getMesesAplicaveis(),
+                'ano'                 => $var->getAno(),
                 'meses_formatados'    => $var->getMesesFormatados(),
                 'meses_array'         => $var->getMesesArray(),
             ];

@@ -21,8 +21,8 @@ class VariavelOrcamentoRepository
             ? $variavel->getOrdem()
             : $this->proximaOrdem($variavel->getContaId(), $variavel->getTipo()->value);
 
-        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, meses_aplicaveis, valor_padrao, ordem)
-                VALUES (:conta_id, :nome, :tipo, :tipo_calculo, :label_multiplicador, :is_fixo, :meses_aplicaveis, :valor_padrao, :ordem)";
+        $sql = "INSERT INTO variaveis_orcamento (conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, meses_aplicaveis, ano, valor_padrao, ordem)
+                VALUES (:conta_id, :nome, :tipo, :tipo_calculo, :label_multiplicador, :is_fixo, :meses_aplicaveis, :ano, :valor_padrao, :ordem)";
 
         $stmt = $this->pdo->prepare($sql);
 
@@ -34,6 +34,7 @@ class VariavelOrcamentoRepository
             ':label_multiplicador' => $variavel->getLabelMultiplicador() ?? 'Dias',
             ':is_fixo'             => $variavel->getIsFixo() ? 1 : 0,
             ':meses_aplicaveis'    => $variavel->getMesesAplicaveis(),
+            ':ano'                 => $variavel->getAno(),
             ':valor_padrao'        => $variavel->getValorPadrao(),
             ':ordem'               => $ordem
         ]);
@@ -43,7 +44,7 @@ class VariavelOrcamentoRepository
 
     public function buscarPorConta(int $contaId): array
     {
-        $sql = "SELECT id, conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, meses_aplicaveis, valor_padrao, ordem 
+        $sql = "SELECT id, conta_id, nome, tipo, tipo_calculo, label_multiplicador, is_fixo, meses_aplicaveis, ano, valor_padrao, ordem 
                 FROM variaveis_orcamento 
                 WHERE conta_id = :conta_id 
                 ORDER BY tipo ASC, ordem ASC, id ASC";
@@ -67,7 +68,8 @@ class VariavelOrcamentoRepository
                 ordem: (int) $row['ordem'],
                 tipoCalculo: $tipoCalculo,
                 labelMultiplicador: (string) ($row['label_multiplicador'] ?? 'Dias'),
-                mesesAplicaveis: isset($row['meses_aplicaveis']) ? (string) $row['meses_aplicaveis'] : null
+                mesesAplicaveis: isset($row['meses_aplicaveis']) ? (string) $row['meses_aplicaveis'] : null,
+                ano: isset($row['ano']) && $row['ano'] !== null ? (int) $row['ano'] : null
             );
         }
 

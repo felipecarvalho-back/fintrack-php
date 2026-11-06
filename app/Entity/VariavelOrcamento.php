@@ -19,7 +19,8 @@ class VariavelOrcamento
         private int $ordem = 0,
         private TipoCalculo $tipoCalculo = TipoCalculo::Simples,
         private ?string $labelMultiplicador = 'Dias',
-        private ?string $mesesAplicaveis = null
+        private ?string $mesesAplicaveis = null,
+        private ?int $ano = null
     ) {}
 
     public function getId(): ?int
@@ -77,6 +78,11 @@ class VariavelOrcamento
         return $this->mesesAplicaveis;
     }
 
+    public function getAno(): ?int
+    {
+        return $this->ano;
+    }
+
     /**
      * Retorna um array com os números dos meses (1 a 12) onde a variável se aplica.
      */
@@ -108,13 +114,27 @@ class VariavelOrcamento
     }
 
     /**
-     * Retorna a descrição amigável dos meses aplicáveis (ex: "Todos os meses", "Jan, Fev" ou "Novembro").
+     * Verifica se a variável se aplica considerando tanto o mês quanto o ano especificado.
+     */
+    public function aplicaNoMesEAno(int $mes, int $ano): bool
+    {
+        if ($this->ano !== null && $this->ano > 0 && $this->ano !== $ano) {
+            return false;
+        }
+
+        return $this->aplicaNoMes($mes);
+    }
+
+    /**
+     * Retorna a descrição amigável dos meses aplicáveis (ex: "Todos os meses", "Jan, Fev" ou "Novembro/2026").
      */
     public function getMesesFormatados(): string
     {
         $meses = $this->getMesesArray();
+        $strAno = ($this->ano !== null && $this->ano > 0) ? " / {$this->ano}" : '';
+
         if (count($meses) === 12) {
-            return 'Todos os meses';
+            return ($this->ano !== null && $this->ano > 0) ? "Todos os meses de {$this->ano}" : 'Todos os meses';
         }
 
         $siglas = [
@@ -130,7 +150,7 @@ class VariavelOrcamento
             }
         }
 
-        return !empty($res) ? implode(', ', $res) : 'Todos os meses';
+        return !empty($res) ? implode(', ', $res) . $strAno : 'Todos os meses';
     }
 
     public function toArray(): array
@@ -144,6 +164,7 @@ class VariavelOrcamento
             'labelMultiplicador' => $this->labelMultiplicador,
             'isFixo'             => $this->isFixo,
             'mesesAplicaveis'    => $this->mesesAplicaveis,
+            'ano'                => $this->ano,
             'mesesArray'         => $this->getMesesArray(),
             'mesesFormatados'    => $this->getMesesFormatados(),
             'valorPadrao'        => $this->valorPadrao,
