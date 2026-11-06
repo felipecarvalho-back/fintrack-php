@@ -266,7 +266,7 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
     <!-- Modal Nova Variável (Alpine.js Powered) -->
     <?php $dadosModal = $_SESSION['dados_modal_variavel'] ?? []; ?>
     <div class="modal fade" id="modalNovaVariavel" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" 
                  x-data="modalVariavelHandler(<?php echo (int) date('n'); ?>, <?php echo (int) date('Y'); ?>)">
                 
@@ -301,162 +301,174 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                             </div>
                         <?php endif; ?>
 
-                        <!-- Seletor Tipo: Receita vs Despesa (Pill Tabs Modernos) -->
-                        <div class="p-1 bg-light rounded-3 d-flex gap-1 border mb-3">
-                            <button type="button" class="btn btn-sm flex-fill rounded-2 fw-semibold transition-all py-2"
-                                :class="tipo === 'receita' ? 'bg-success text-white shadow-sm' : 'text-secondary hover-bg-white border-0'"
-                                @click="tipo = 'receita'">
-                                <i class="bi bi-arrow-down-left me-1"></i> Receita (+ Ganho)
-                            </button>
-                            <button type="button" class="btn btn-sm flex-fill rounded-2 fw-semibold transition-all py-2"
-                                :class="tipo === 'despesa' ? 'bg-danger text-white shadow-sm' : 'text-secondary hover-bg-white border-0'"
-                                @click="tipo = 'despesa'">
-                                <i class="bi bi-arrow-up-right me-1"></i> Despesa (- Gasto)
-                            </button>
-                        </div>
+                        <div class="row g-4">
+                            <!-- Coluna Esquerda: Definições da Variável -->
+                            <div class="col-12 col-md-6 d-flex flex-column gap-3">
+                                <!-- Seletor Tipo: Receita vs Despesa (Pill Tabs Modernos) -->
+                                <div>
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Tipo de Movimentação</label>
+                                    <div class="p-1 bg-light rounded-3 d-flex gap-1 border">
+                                        <button type="button" class="btn btn-sm flex-fill rounded-2 fw-semibold transition-all py-2"
+                                            :class="tipo === 'receita' ? 'bg-success text-white shadow-sm' : 'text-secondary hover-bg-white border-0'"
+                                            @click="tipo = 'receita'">
+                                            <i class="bi bi-arrow-down-left me-1"></i> Receita (+ Ganho)
+                                        </button>
+                                        <button type="button" class="btn btn-sm flex-fill rounded-2 fw-semibold transition-all py-2"
+                                            :class="tipo === 'despesa' ? 'bg-danger text-white shadow-sm' : 'text-secondary hover-bg-white border-0'"
+                                            @click="tipo = 'despesa'">
+                                            <i class="bi bi-arrow-up-right me-1"></i> Despesa (- Gasto)
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <!-- Nome do Campo -->
-                        <div class="mb-3">
-                            <label for="nome" class="form-label small fw-semibold text-secondary">Nome do Campo</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-muted">
-                                    <i class="bi bi-tag"></i>
-                                </span>
-                                <input type="text" class="form-control border-start-0 ps-0" id="nome" name="nome" 
-                                    value="<?php echo htmlspecialchars($dadosModal['nome'] ?? ''); ?>"
-                                    placeholder="Ex: Ajuda Mãe, Netflix, Freelance, Academia..." required>
-                            </div>
-                        </div>
+                                <!-- Nome do Campo -->
+                                <div>
+                                    <label for="nome" class="form-label small fw-semibold text-secondary mb-1">Nome do Campo</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted">
+                                            <i class="bi bi-tag"></i>
+                                        </span>
+                                        <input type="text" class="form-control border-start-0 ps-0" id="nome" name="nome" 
+                                            value="<?php echo htmlspecialchars($dadosModal['nome'] ?? ''); ?>"
+                                            placeholder="Ex: Ajuda Mãe, Netflix, Freelance..." required>
+                                    </div>
+                                </div>
 
-                        <!-- Modo de Cálculo (Cards Clicáveis) -->
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold text-secondary">Modo de Cálculo</label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <div class="p-2 rounded-3 cursor-pointer transition-all border d-flex align-items-center gap-2"
-                                         :class="tipoCalculo === 'simples' ? 'border-primary bg-primary-subtle text-primary shadow-sm' : 'bg-light text-secondary border-dashed hover-bg-white'"
-                                         @click="tipoCalculo = 'simples'">
-                                        <i class="bi bi-cash-stack fs-5"></i>
-                                        <div>
-                                            <div class="fw-bold small">Valor Direto</div>
-                                            <div class="small opacity-75" style="font-size: 0.7rem;">R$ fixo ou variável</div>
+                                <!-- Modo de Cálculo (Cards Clicáveis) -->
+                                <div>
+                                    <label class="form-label small fw-semibold text-secondary mb-1">Modo de Cálculo</label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="p-2 rounded-3 cursor-pointer transition-all border d-flex align-items-center gap-2 h-100"
+                                                 :class="tipoCalculo === 'simples' ? 'border-primary bg-primary-subtle text-primary shadow-sm' : 'bg-light text-secondary border-dashed hover-bg-white'"
+                                                 @click="tipoCalculo = 'simples'">
+                                                <i class="bi bi-cash-stack fs-5"></i>
+                                                <div>
+                                                    <div class="fw-bold small">Valor Direto</div>
+                                                    <div class="small opacity-75" style="font-size: 0.7rem;">R$ fixo ou variável</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 rounded-3 cursor-pointer transition-all border d-flex align-items-center gap-2 h-100"
+                                                 :class="tipoCalculo === 'multiplicador' ? 'border-primary bg-primary-subtle text-primary shadow-sm' : 'bg-light text-secondary border-dashed hover-bg-white'"
+                                                 @click="tipoCalculo = 'multiplicador'">
+                                                <i class="bi bi-calculator fs-5"></i>
+                                                <div>
+                                                    <div class="fw-bold small">Multiplicador</div>
+                                                    <div class="small opacity-75" style="font-size: 0.7rem;">Qtd &times; Unitário</div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-6">
-                                    <div class="p-2 rounded-3 cursor-pointer transition-all border d-flex align-items-center gap-2"
-                                         :class="tipoCalculo === 'multiplicador' ? 'border-primary bg-primary-subtle text-primary shadow-sm' : 'bg-light text-secondary border-dashed hover-bg-white'"
-                                         @click="tipoCalculo = 'multiplicador'">
-                                        <i class="bi bi-calculator fs-5"></i>
-                                        <div>
-                                            <div class="fw-bold small">Multiplicador</div>
-                                            <div class="small opacity-75" style="font-size: 0.7rem;">Qtd &times; Valor Unitário</div>
+
+                                <!-- Campo Multiplicador Dinâmico -->
+                                <div x-show="tipoCalculo === 'multiplicador'" x-transition class="p-3 bg-light rounded-3 border">
+                                    <label for="label_multiplicador" class="form-label small fw-semibold text-secondary mb-1">Rótulo da Quantidade</label>
+                                    <input type="text" class="form-control form-control-sm" id="label_multiplicador" name="label_multiplicador" 
+                                        x-model="labelMultiplicador" placeholder="Ex: Dias, Horas, Diárias">
+                                    <small class="text-secondary" style="font-size: 0.72rem;">Ex: dias trabalhados para calcular o repasse à mãe.</small>
+                                </div>
+
+                                <!-- Valor Padrão -->
+                                <div>
+                                    <label for="valor_padrao" class="form-label small fw-semibold text-secondary mb-1"
+                                        x-text="tipoCalculo === 'multiplicador' ? 'Valor Unitário Padrão (R$)' : 'Valor Padrão Sugerido (R$)'"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 text-muted">R$</span>
+                                        <input type="number" step="0.01" min="0" class="form-control border-start-0 ps-0" id="valor_padrao" name="valor_padrao" 
+                                            x-model="valorPadrao" placeholder="0.00">
+                                    </div>
+                                    <small class="text-secondary" style="font-size: 0.72rem;"
+                                        x-text="tipoCalculo === 'multiplicador' ? 'Valor por unidade (ex: R$ 12,20 por dia).' : 'Sugerido automaticamente nos meses programados.'"></small>
+                                </div>
+                            </div>
+
+                            <!-- Coluna Direita: Programação & Frequência (Ano e Meses) -->
+                            <div class="col-12 col-md-6 d-flex flex-column">
+                                <div class="card border-0 bg-light rounded-3 p-3 h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <label class="form-label small fw-bold text-dark mb-0">
+                                                <i class="bi bi-calendar-week me-1 text-primary"></i> Programação & Frequência
+                                            </label>
+                                            <!-- Seletor Ano Recorrente vs Ano Específico -->
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-xs py-1 px-2 transition-all"
+                                                    :class="anoTipo === 'todos' ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-white'"
+                                                    @click="anoTipo = 'todos'">
+                                                    <i class="bi bi-arrow-repeat me-1"></i> Todo ano
+                                                </button>
+                                                <button type="button" class="btn btn-xs py-1 px-2 transition-all"
+                                                    :class="anoTipo === 'especifico' ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-white'"
+                                                    @click="anoTipo = 'especifico'">
+                                                    <i class="bi bi-calendar-check me-1"></i> Ano específico
+                                                </button>
+                                            </div>
                                         </div>
+
+                                        <!-- Input de Ano Específico -->
+                                        <div x-show="anoTipo === 'especifico'" x-transition class="mb-2 py-2 px-3 bg-white rounded-2 border d-flex align-items-center justify-content-between">
+                                            <span class="small text-secondary fw-semibold">Ano de aplicação:</span>
+                                            <div class="input-group input-group-sm" style="width: 140px;">
+                                                <button type="button" class="btn btn-outline-secondary" @click="ano = parseInt(ano) - 1">-</button>
+                                                <input type="number" name="ano" class="form-control text-center fw-bold text-primary" x-model="ano" min="2020" max="2099">
+                                                <button type="button" class="btn btn-outline-secondary" @click="ano = parseInt(ano) + 1">+</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Atalhos de Meses -->
+                                        <div class="d-flex flex-wrap gap-1 mb-2">
+                                            <button type="button" class="btn btn-xs py-1 px-2 rounded-pill transition-all"
+                                                :class="meses.length === 12 ? 'btn-primary text-white shadow-sm' : 'btn-white border text-secondary'"
+                                                @click="selecionarTodosMeses()">
+                                                Todos
+                                            </button>
+                                            <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
+                                                @click="selecionarApenasMes(<?php echo (int) date('n'); ?>)">
+                                                Apenas mês atual
+                                            </button>
+                                            <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
+                                                @click="selecionarSemestre(1)">
+                                                1º Sem.
+                                            </button>
+                                            <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
+                                                @click="selecionarSemestre(2)">
+                                                2º Sem.
+                                            </button>
+                                            <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-danger transition-all"
+                                                @click="limparMeses()">
+                                                Limpar
+                                            </button>
+                                        </div>
+
+                                        <!-- Grid dos 12 meses (4 colunas x 3 linhas) -->
+                                        <div class="d-grid mb-2" style="grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                                            <template x-for="(mNome, mNum) in {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}" :key="mNum">
+                                                <button type="button" class="btn btn-sm py-2 px-1 text-center rounded-2 transition-all fw-semibold"
+                                                    :class="temMes(parseInt(mNum)) 
+                                                        ? 'btn-primary text-white shadow-sm' 
+                                                        : 'btn-outline-light text-secondary border bg-white hover-bg-white'"
+                                                    @click="alternarMes(parseInt(mNum))">
+                                                    <span x-text="mNome" style="font-size: 0.8rem;"></span>
+                                                    <i x-show="temMes(parseInt(mNum))" class="bi bi-check2 d-block" style="font-size: 0.65rem; line-height: 1;"></i>
+                                                </button>
+                                            </template>
+                                        </div>
+
+                                        <!-- Inputs hidden dos meses[] -->
+                                        <template x-for="m in meses" :key="m">
+                                            <input type="hidden" name="meses[]" :value="m">
+                                        </template>
+                                    </div>
+
+                                    <!-- Resumo Dinâmico em Tempo Real -->
+                                    <div class="mt-2 pt-2 border-top d-flex align-items-center gap-1 text-secondary" style="font-size: 0.74rem;">
+                                        <i class="bi bi-info-circle text-primary"></i>
+                                        <span>Vai entrar em: <strong class="text-dark" x-text="resumoProgramacao()"></strong></span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Campo Multiplicador Dinâmico -->
-                        <div x-show="tipoCalculo === 'multiplicador'" x-transition class="mb-3 p-3 bg-light rounded-3 border">
-                            <label for="label_multiplicador" class="form-label small fw-semibold text-secondary">Rótulo da Quantidade</label>
-                            <input type="text" class="form-control form-control-sm" id="label_multiplicador" name="label_multiplicador" 
-                                x-model="labelMultiplicador" placeholder="Ex: Dias, Horas, Diárias, Viagens">
-                            <small class="text-secondary" style="font-size: 0.72rem;">Ex: dias trabalhados para calcular o repasse à mãe.</small>
-                        </div>
-
-                        <!-- Valor Padrão -->
-                        <div class="mb-3">
-                            <label for="valor_padrao" class="form-label small fw-semibold text-secondary"
-                                x-text="tipoCalculo === 'multiplicador' ? 'Valor Unitário Padrão (R$)' : 'Valor Padrão Sugerido (R$)'"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-muted">R$</span>
-                                <input type="number" step="0.01" min="0" class="form-control border-start-0 ps-0" id="valor_padrao" name="valor_padrao" 
-                                    x-model="valorPadrao" placeholder="0.00">
-                            </div>
-                            <small class="text-secondary" style="font-size: 0.72rem;"
-                                x-text="tipoCalculo === 'multiplicador' ? 'Valor pago por unidade (ex: R$ 12,20 por dia).' : 'Este valor será sugerido automaticamente nos meses programados.'"></small>
-                        </div>
-
-                        <!-- Painel de Programação (Meses e Ano) -->
-                        <div class="card border-0 bg-light rounded-3 p-3">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <label class="form-label small fw-bold text-dark mb-0">
-                                    <i class="bi bi-calendar-week me-1 text-primary"></i> Programação & Frequência
-                                </label>
-                                <!-- Seletor Ano Recorrente vs Ano Específico -->
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button type="button" class="btn btn-xs py-1 px-2 transition-all"
-                                        :class="anoTipo === 'todos' ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-white'"
-                                        @click="anoTipo = 'todos'">
-                                        <i class="bi bi-arrow-repeat me-1"></i> Todo ano
-                                    </button>
-                                    <button type="button" class="btn btn-xs py-1 px-2 transition-all"
-                                        :class="anoTipo === 'especifico' ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-white'"
-                                        @click="anoTipo = 'especifico'">
-                                        <i class="bi bi-calendar-check me-1"></i> Ano específico
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Input de Ano Específico -->
-                            <div x-show="anoTipo === 'especifico'" x-transition class="mb-2 py-2 px-3 bg-white rounded-2 border d-flex align-items-center justify-content-between">
-                                <span class="small text-secondary fw-semibold">Ano de aplicação:</span>
-                                <div class="input-group input-group-sm" style="width: 140px;">
-                                    <button type="button" class="btn btn-outline-secondary" @click="ano = parseInt(ano) - 1">-</button>
-                                    <input type="number" name="ano" class="form-control text-center fw-bold text-primary" x-model="ano" min="2020" max="2099">
-                                    <button type="button" class="btn btn-outline-secondary" @click="ano = parseInt(ano) + 1">+</button>
-                                </div>
-                            </div>
-
-                            <!-- Atalhos de Meses -->
-                            <div class="d-flex flex-wrap gap-1 mb-2">
-                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill transition-all"
-                                    :class="meses.length === 12 ? 'btn-primary text-white shadow-sm' : 'btn-white border text-secondary'"
-                                    @click="selecionarTodosMeses()">
-                                    Todos os meses
-                                </button>
-                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
-                                    @click="selecionarApenasMes(<?php echo (int) date('n'); ?>)">
-                                    Apenas mês atual
-                                </button>
-                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
-                                    @click="selecionarSemestre(1)">
-                                    1º Semestre
-                                </button>
-                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-secondary transition-all"
-                                    @click="selecionarSemestre(2)">
-                                    2º Semestre
-                                </button>
-                                <button type="button" class="btn btn-xs py-1 px-2 rounded-pill btn-white border text-danger transition-all"
-                                    @click="limparMeses()">
-                                    Limpar
-                                </button>
-                            </div>
-
-                            <!-- Grid dos 12 meses -->
-                            <div class="d-grid" style="grid-template-columns: repeat(6, 1fr); gap: 6px;">
-                                <template x-for="(mNome, mNum) in {1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'}" :key="mNum">
-                                    <button type="button" class="btn btn-sm py-2 px-1 text-center rounded-2 transition-all fw-semibold"
-                                        :class="temMes(parseInt(mNum)) 
-                                            ? 'btn-primary text-white shadow-sm' 
-                                            : 'btn-outline-light text-secondary border bg-white hover-bg-white'"
-                                        @click="alternarMes(parseInt(mNum))">
-                                        <span x-text="mNome" style="font-size: 0.8rem;"></span>
-                                        <i x-show="temMes(parseInt(mNum))" class="bi bi-check2 d-block" style="font-size: 0.65rem; line-height: 1;"></i>
-                                    </button>
-                                </template>
-                            </div>
-
-                            <!-- Inputs hidden dos meses[] -->
-                            <template x-for="m in meses" :key="m">
-                                <input type="hidden" name="meses[]" :value="m">
-                            </template>
-
-                            <!-- Resumo Dinâmico em Tempo Real -->
-                            <div class="mt-2 pt-2 border-top d-flex align-items-center gap-1 text-secondary" style="font-size: 0.74rem;">
-                                <i class="bi bi-info-circle text-primary"></i>
-                                <span>Vai entrar em: <strong class="text-dark" x-text="resumoProgramacao()"></strong></span>
                             </div>
                         </div>
 
@@ -467,6 +479,10 @@ $despesas = array_filter($todasVariaveis, fn($v) => $v['tipo'] === 'despesa');
                             <i class="bi bi-plus-lg me-1"></i> Cadastrar Variável
                         </button>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
                 </form>
             </div>
         </div>
