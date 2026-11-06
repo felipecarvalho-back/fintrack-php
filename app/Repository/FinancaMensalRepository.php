@@ -108,6 +108,66 @@ class FinancaMensalRepository
     }
 
     /**
+     * Busca o último valor preenchido/salvo de uma variável em meses anteriores.
+     *
+     * @return array{quantidade: float, valor_unitario: float, valor: float}|null
+     */
+    public function buscarUltimoValorSalvo(int $contaId, int $variavelId, int $ano, int $mes): ?array
+    {
+        $sql = "SELECT vm.quantidade, vm.valor_unitario, vm.valor
+                FROM valores_mensais vm
+                INNER JOIN financas_mensais fm ON fm.id = vm.financa_mensal_id
+                WHERE fm.conta_id = :conta_id 
+                  AND vm.variavel_id = :variavel_id
+                  AND (fm.ano < :ano OR (fm.ano = :ano AND fm.mes < :mes))
+                ORDER BY fm.ano DESC, fm.mes DESC
+                LIMIT 1";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':conta_id'    => $contaId,
+            ':variavel_id' => $variavelId,
+            ':ano'         => $ano,
+            ':mes'         => $mes,
+        ]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'quantidade'     => isset($row['quantidade']) ? (float) $row['quantidade'] : 1.0,
+            'valor_unitario' => isset($row['valor_unitario']) ? (float) $row['valor_unitario'] : (float) $row['valor'],
+            'valor'          => (float) $row['valor'],
+        ];
+    }
+
+    /**
+     * Vincula ou atualiza o valor de uma variável em um mês específico.
+     */
+    public function vincularVariavelNoMes(int $contaId, int $mes, int $ano, int $variavelId, float $quantidade, float $valorUnitario, float $valor): void
+    {
+        $financa = $this->obterOuCriar($contaId, $mes, $ano);
+
+        $sql = "INSERT INTO valores_mensais (financa_mensal_id, variavel_id, quantidade, valor_unitario, valor)
+                VALUES (:financa_mensal_id, :variavel_id, :quantidade, :valor_unitario, :valor)
+                ON DUPLICATE KEY UPDATE 
+                    quantidade = VALUES(quantidade),
+                    valor_unitario = VALUES(valor_unitario),
+                    valor = VALUES(valor)";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([
+            ':financa_mensal_id' => (int) $financa->getId(),
+            ':variavel_id'       => $variavelId,
+            ':quantidade'        => $quantidade,
+            ':valor_unitario'    => $valorUnitario,
+            ':valor'             => $valor,
+        ]);
+    }
+
+    /**
      * Salva ou atualiza um lote de valores no mês com suporte a multiplicador (quantidade e unitário).
      *
      * @param array<int, array|float> $itensPorVariavel [variavel_id => ['quantidade' => 20, 'unitario' => 25, 'valor' => 500] ou float]

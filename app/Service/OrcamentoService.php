@@ -63,16 +63,33 @@ class OrcamentoService
             $labelMultiplicador = $var->getLabelMultiplicador() ?? 'Dias';
 
             if (isset($mapaValores[$varId])) {
+                // Já existe lançamento salvo especificamente para este mês
                 $salvo = $mapaValores[$varId];
                 $quantidade = (float) $salvo['quantidade'];
                 $valorUnitario = (float) $salvo['valor_unitario'];
                 $valorAtual = (float) $salvo['valor'];
             } else {
-                $quantidade = 1.0;
-                $valorUnitario = $var->getValorPadrao();
-                $valorAtual = ($tipoCalculo === TipoCalculo::Multiplicador) 
-                    ? ($quantidade * $valorUnitario) 
-                    : $var->getValorPadrao();
+                // Este mês ainda não possui lançamento salvo para esta variável:
+                // Se NÃO for fixo (is_fixo = 0), NÃO deve se propagar para outros meses
+                if (!$var->isFixo()) {
+                    continue;
+                }
+
+                // Se for FIXO (is_fixo = 1), repete todo mês herdando o último valor salvo mais recente ou o padrão
+                $ultimoSalvo = $this->financaRepository->buscarUltimoValorSalvo($contaId, $varId, $ano, $mes);
+                if ($ultimoSalvo !== null) {
+                    $quantidade = (float) $ultimoSalvo['quantidade'];
+                    $valorUnitario = (float) $ultimoSalvo['valor_unitario'];
+                    $valorAtual = ($tipoCalculo === TipoCalculo::Multiplicador)
+                        ? ($quantidade * $valorUnitario)
+                        : (float) $ultimoSalvo['valor'];
+                } else {
+                    $quantidade = 1.0;
+                    $valorUnitario = $var->getValorPadrao();
+                    $valorAtual = ($tipoCalculo === TipoCalculo::Multiplicador) 
+                        ? ($quantidade * $valorUnitario) 
+                        : $var->getValorPadrao();
+                }
             }
 
             $item = [

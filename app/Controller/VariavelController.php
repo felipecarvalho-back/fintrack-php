@@ -39,7 +39,14 @@ class VariavelController
         $origem = (string) ($dados['origem'] ?? '/variaveis');
 
         try {
-            $this->service->cadastrar($contaId, $dados);
+            $novaId = $this->service->cadastrar($contaId, $dados);
+
+            $mes = isset($dados['mes']) ? (int) $dados['mes'] : 0;
+            $ano = isset($dados['ano']) ? (int) $dados['ano'] : 0;
+            if ($mes > 0 && $ano > 0) {
+                $this->service->vincularAoMes($contaId, $mes, $ano, $novaId, $dados);
+            }
+
             $_SESSION['sucesso'] = "Variável adicionada com sucesso!";
 
             return $response->withHeader('Location', $origem)->withStatus(302);

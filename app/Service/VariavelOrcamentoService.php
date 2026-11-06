@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Entity\VariavelOrcamento;
 use App\Enum\TipoCalculo;
 use App\Enum\TipoVariavel;
+use App\Repository\FinancaMensalRepository;
 use App\Repository\VariavelOrcamentoRepository;
 use InvalidArgumentException;
 use ValueError;
@@ -14,7 +15,8 @@ use ValueError;
 class VariavelOrcamentoService
 {
     public function __construct(
-        private VariavelOrcamentoRepository $repository
+        private VariavelOrcamentoRepository $repository,
+        private ?FinancaMensalRepository $financaRepository = null
     ) {}
 
     public function cadastrar(int $contaId, array $dados): int
@@ -66,6 +68,29 @@ class VariavelOrcamentoService
         );
 
         return $this->repository->inserir($variavel);
+    }
+
+    public function vincularAoMes(int $contaId, int $mes, int $ano, int $variavelId, array $dados): void
+    {
+        if ($this->financaRepository === null || $mes < 1 || $mes > 12 || $ano < 2000 || $ano > 2100) {
+            return;
+        }
+
+        $valorPadrao = $this->sanitizarValorMonetario($dados['valor_padrao'] ?? 0.0);
+        $tipoCalculo = strtolower(trim((string) ($dados['tipo_calculo'] ?? 'simples')));
+        $quantidade = ($tipoCalculo === 'multiplicador') ? 1.0 : 1.0;
+        $valorUnitario = $valorPadrao;
+        $valor = $valorPadrao;
+
+        $this->financaRepository->vincularVariavelNoMes(
+            $contaId,
+            $mes,
+            $ano,
+            $variavelId,
+            $quantidade,
+            $valorUnitario,
+            $valor
+        );
     }
 
     public function excluir(int $id, int $contaId): bool

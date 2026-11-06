@@ -457,6 +457,8 @@ if ($proximoMes > 12) {
                 </div>
                 <form action="/variaveis/adicionar" method="POST">
                     <input type="hidden" name="origem" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/orcamento'); ?>">
+                    <input type="hidden" name="mes" value="<?php echo $mesAtual; ?>">
+                    <input type="hidden" name="ano" value="<?php echo $anoAtual; ?>">
                     <div class="modal-body p-4">
 
                         <!-- Alerta de Erro de Validação -->
